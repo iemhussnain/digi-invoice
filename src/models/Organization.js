@@ -289,9 +289,7 @@ const organizationSchema = new mongoose.Schema(
 );
 
 // Indexes
-organizationSchema.index({ slug: 1 });
-organizationSchema.index({ ntn: 1 });
-organizationSchema.index({ strn: 1 });
+// slug, ntn, strn already have unique indexes (lines 21, 95, 102)
 organizationSchema.index({ status: 1 });
 organizationSchema.index({ 'subscription.status': 1 });
 organizationSchema.index({ ownerId: 1 });
