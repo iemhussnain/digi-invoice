@@ -9,6 +9,8 @@ import Session from '@/models/Session';
 import { successResponse, errorResponse, unauthorizedError } from '@/utils/response';
 import logger from '@/utils/logger';
 import { verifyToken, generateUserToken, generateRefreshToken } from '@/utils/jwt';
+import { setAuthCookies, getCookie } from '@/utils/cookies';
+import { NextResponse } from 'next/server';
 
 export async function POST(request) {
   try {
@@ -16,11 +18,23 @@ export async function POST(request) {
     await connectDB();
 
     // ========================================
-    // Step 1: Get Refresh Token from Body
+    // Step 1: Get Refresh Token from Body or Cookie
     // ========================================
 
-    const body = await request.json();
-    const { refreshToken } = body;
+    let refreshToken;
+
+    // Try to get refresh token from cookie first
+    refreshToken = getCookie(request, 'refreshToken');
+
+    // If not in cookie, try request body
+    if (!refreshToken) {
+      try {
+        const body = await request.json();
+        refreshToken = body.refreshToken;
+      } catch (e) {
+        // Body parsing failed, no refresh token available
+      }
+    }
 
     if (!refreshToken) {
       logger.warning('Refresh token missing');
@@ -130,25 +144,34 @@ export async function POST(request) {
     });
 
     // ========================================
-    // Step 6: Return New Tokens
+    // Step 6: Return New Tokens with Cookies
     // ========================================
 
-    return successResponse(
+    // Create response with cookies
+    const response = NextResponse.json(
       {
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
-        expiresIn: '7d', // Access token expiry
-        tokenType: 'Bearer',
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
+        success: true,
+        message: 'Token refreshed successfully',
+        data: {
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
+          expiresIn: '7d', // Access token expiry
+          tokenType: 'Bearer',
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          },
         },
       },
-      'Token refreshed successfully',
-      200
+      { status: 200 }
     );
+
+    // Set secure HTTP-only cookies
+    setAuthCookies(response, newAccessToken, newRefreshToken);
+
+    return response;
   } catch (error) {
     logger.error('Refresh token error', error);
 

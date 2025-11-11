@@ -9,9 +9,11 @@ import Session from '@/models/Session';
 import { successResponse, errorResponse, validationError } from '@/utils/response';
 import logger from '@/utils/logger';
 import { validateEmail } from '@/utils/validators';
-import { generateUserToken } from '@/utils/jwt';
+import { generateUserToken, generateRefreshToken } from '@/utils/jwt';
 import { getDeviceInfo } from '@/utils/deviceFingerprint';
+import { setAuthCookies } from '@/utils/cookies';
 import crypto from 'crypto';
+import { NextResponse } from 'next/server';
 
 export async function POST(request) {
   try {
@@ -250,8 +252,9 @@ export async function POST(request) {
         user.lastLoginIP = deviceInfo.ipAddress;
         await user.save();
 
-        // Generate new token with existing session
+        // Generate new tokens with existing session
         const token = generateUserToken(user, existingSession.sessionId);
+        const refreshToken = generateRefreshToken(user);
 
         logger.success('Login successful - session extended', {
           userId: user._id,
@@ -259,40 +262,50 @@ export async function POST(request) {
           sessionId: existingSession.sessionId,
         });
 
-        return successResponse(
+        // Create response with cookies
+        const response = NextResponse.json(
           {
-            user: {
-              id: user._id,
-              name: user.name,
-              email: user.email,
-              role: user.role,
-              phone: user.phone,
-              avatar: user.avatar,
-              status: user.status,
-              preferences: user.preferences,
-            },
-            organization: {
-              id: user.organizationId._id,
-              name: user.organizationId.name,
-              slug: user.organizationId.slug,
-              subscription: {
-                plan: user.organizationId.subscription.plan,
-                status: user.organizationId.subscription.status,
-                endDate: user.organizationId.subscription.endDate,
-                features: user.organizationId.subscription.features,
+            success: true,
+            message: 'Login successful - session extended',
+            data: {
+              user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                phone: user.phone,
+                avatar: user.avatar,
+                status: user.status,
+                preferences: user.preferences,
               },
+              organization: {
+                id: user.organizationId._id,
+                name: user.organizationId.name,
+                slug: user.organizationId.slug,
+                subscription: {
+                  plan: user.organizationId.subscription.plan,
+                  status: user.organizationId.subscription.status,
+                  endDate: user.organizationId.subscription.endDate,
+                  features: user.organizationId.subscription.features,
+                },
+              },
+              session: {
+                sessionId: existingSession.sessionId,
+                expiresAt: existingSession.expiresAt,
+                device: `${deviceInfo.browser} on ${deviceInfo.os}`,
+                loginAt: existingSession.loginAt,
+              },
+              token,
+              refreshToken,
             },
-            session: {
-              sessionId: existingSession.sessionId,
-              expiresAt: existingSession.expiresAt,
-              device: `${deviceInfo.browser} on ${deviceInfo.os}`,
-              loginAt: existingSession.loginAt,
-            },
-            token,
           },
-          'Login successful - session extended',
-          200
+          { status: 200 }
         );
+
+        // Set secure HTTP-only cookies
+        setAuthCookies(response, token, refreshToken);
+
+        return response;
       }
     }
 
@@ -338,13 +351,14 @@ export async function POST(request) {
     await user.save();
 
     // ========================================
-    // Step 9: Generate JWT Token
+    // Step 9: Generate JWT Tokens
     // ========================================
 
     const token = generateUserToken(user, session.sessionId);
+    const refreshToken = generateRefreshToken(user);
 
     // ========================================
-    // Step 10: Return Success Response
+    // Step 10: Return Success Response with Cookies
     // ========================================
 
     logger.success('Login successful', {
@@ -354,44 +368,54 @@ export async function POST(request) {
       sessionId: session.sessionId,
     });
 
-    return successResponse(
+    // Create response with cookies
+    const response = NextResponse.json(
       {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          phone: user.phone,
-          avatar: user.avatar,
-          department: user.department,
-          status: user.status,
-          preferences: user.preferences,
-        },
-        organization: {
-          id: user.organizationId._id,
-          name: user.organizationId.name,
-          slug: user.organizationId.slug,
-          logo: user.organizationId.logo,
-          subscription: {
-            plan: user.organizationId.subscription.plan,
-            status: user.organizationId.subscription.status,
-            endDate: user.organizationId.subscription.endDate,
-            features: user.organizationId.subscription.features,
+        success: true,
+        message: 'Login successful',
+        data: {
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            phone: user.phone,
+            avatar: user.avatar,
+            department: user.department,
+            status: user.status,
+            preferences: user.preferences,
           },
-          settings: user.organizationId.settings,
+          organization: {
+            id: user.organizationId._id,
+            name: user.organizationId.name,
+            slug: user.organizationId.slug,
+            logo: user.organizationId.logo,
+            subscription: {
+              plan: user.organizationId.subscription.plan,
+              status: user.organizationId.subscription.status,
+              endDate: user.organizationId.subscription.endDate,
+              features: user.organizationId.subscription.features,
+            },
+            settings: user.organizationId.settings,
+          },
+          session: {
+            sessionId: session.sessionId,
+            expiresAt: session.expiresAt,
+            device: `${deviceInfo.browser} on ${deviceInfo.os}`,
+            ipAddress: deviceInfo.ipAddress,
+            loginAt: session.loginAt,
+          },
+          token,
+          refreshToken,
         },
-        session: {
-          sessionId: session.sessionId,
-          expiresAt: session.expiresAt,
-          device: `${deviceInfo.browser} on ${deviceInfo.os}`,
-          ipAddress: deviceInfo.ipAddress,
-          loginAt: session.loginAt,
-        },
-        token,
       },
-      'Login successful',
-      200
+      { status: 200 }
     );
+
+    // Set secure HTTP-only cookies
+    setAuthCookies(response, token, refreshToken);
+
+    return response;
   } catch (error) {
     logger.error('Login error', error);
 

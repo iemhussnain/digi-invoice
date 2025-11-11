@@ -20,9 +20,11 @@ import {
   validateSTRN,
   sanitizeInput,
 } from '@/utils/validators';
-import { generateUserToken } from '@/utils/jwt';
+import { generateUserToken, generateRefreshToken } from '@/utils/jwt';
 import { getDeviceInfo } from '@/utils/deviceFingerprint';
+import { setAuthCookies } from '@/utils/cookies';
 import crypto from 'crypto';
+import { NextResponse } from 'next/server';
 
 export async function POST(request) {
   try {
@@ -335,11 +337,12 @@ export async function POST(request) {
       userId: user._id,
     });
 
-    // Generate JWT token
+    // Generate JWT tokens
     const token = generateUserToken(user, session.sessionId);
+    const refreshToken = generateRefreshToken(user);
 
     // ========================================
-    // Step 6: Return Response
+    // Step 6: Return Response with Cookies
     // ========================================
 
     logger.success('Registration successful', {
@@ -348,38 +351,49 @@ export async function POST(request) {
       organizationId: organization._id,
     });
 
-    return successResponse(
+    // Create response with cookies
+    const response = NextResponse.json(
       {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          phone: user.phone,
-          status: user.status,
-        },
-        organization: {
-          id: organization._id,
-          name: organization.name,
-          slug: organization.slug,
-          subscription: {
-            plan: organization.subscription.plan,
-            status: organization.subscription.status,
-            endDate: organization.subscription.endDate,
+        success: true,
+        message:
+          organizationType === 'new'
+            ? 'Registration successful! Your organization has been created.'
+            : 'Registration successful! You have joined the organization.',
+        data: {
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            phone: user.phone,
+            status: user.status,
           },
+          organization: {
+            id: organization._id,
+            name: organization.name,
+            slug: organization.slug,
+            subscription: {
+              plan: organization.subscription.plan,
+              status: organization.subscription.status,
+              endDate: organization.subscription.endDate,
+            },
+          },
+          session: {
+            sessionId: session.sessionId,
+            expiresAt: session.expiresAt,
+            device: `${deviceInfo.browser} on ${deviceInfo.os}`,
+          },
+          token,
+          refreshToken,
         },
-        session: {
-          sessionId: session.sessionId,
-          expiresAt: session.expiresAt,
-          device: `${deviceInfo.browser} on ${deviceInfo.os}`,
-        },
-        token,
       },
-      organizationType === 'new'
-        ? 'Registration successful! Your organization has been created.'
-        : 'Registration successful! You have joined the organization.',
-      201
+      { status: 201 }
     );
+
+    // Set secure HTTP-only cookies
+    setAuthCookies(response, token, refreshToken);
+
+    return response;
   } catch (error) {
     logger.error('Registration error', error);
 

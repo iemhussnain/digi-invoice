@@ -9,6 +9,8 @@ import { successResponse, errorResponse, unauthorizedError } from '@/utils/respo
 import logger from '@/utils/logger';
 import { verifyToken, extractTokenFromHeader } from '@/utils/jwt';
 import { getIPAddress } from '@/utils/deviceFingerprint';
+import { clearAuthCookies } from '@/utils/cookies';
+import { NextResponse } from 'next/server';
 
 export async function POST(request) {
   try {
@@ -56,13 +58,21 @@ export async function POST(request) {
 
       // Session doesn't exist or already logged out
       // Return success anyway (idempotent operation)
-      return successResponse(
+      const response = NextResponse.json(
         {
-          message: 'Already logged out',
+          success: true,
+          message: 'Logout successful',
+          data: {
+            message: 'Already logged out',
+          },
         },
-        'Logout successful',
-        200
+        { status: 200 }
       );
+
+      // Clear cookies
+      clearAuthCookies(response);
+
+      return response;
     }
 
     // ========================================
@@ -80,19 +90,27 @@ export async function POST(request) {
     });
 
     // ========================================
-    // Step 4: Return Success Response
+    // Step 4: Return Success Response with Cookie Clearing
     // ========================================
 
-    return successResponse(
+    const response = NextResponse.json(
       {
-        sessionId: session.sessionId,
-        logoutAt: session.logoutAt,
-        sessionDuration: session.duration, // in seconds
-        device: `${session.device.browser} on ${session.device.os}`,
+        success: true,
+        message: 'Logout successful',
+        data: {
+          sessionId: session.sessionId,
+          logoutAt: session.logoutAt,
+          sessionDuration: session.duration, // in seconds
+          device: `${session.device.browser} on ${session.device.os}`,
+        },
       },
-      'Logout successful',
-      200
+      { status: 200 }
     );
+
+    // Clear cookies
+    clearAuthCookies(response);
+
+    return response;
   } catch (error) {
     logger.error('Logout error', error);
 
@@ -147,18 +165,26 @@ export async function DELETE(request) {
     });
 
     // ========================================
-    // Step 3: Return Success Response
+    // Step 3: Return Success Response with Cookie Clearing
     // ========================================
 
-    return successResponse(
+    const response = NextResponse.json(
       {
-        userId,
-        sessionsDeactivated: result.modifiedCount,
-        logoutAt: new Date(),
+        success: true,
+        message: `Logged out from ${result.modifiedCount} device(s)`,
+        data: {
+          userId,
+          sessionsDeactivated: result.modifiedCount,
+          logoutAt: new Date(),
+        },
       },
-      `Logged out from ${result.modifiedCount} device(s)`,
-      200
+      { status: 200 }
     );
+
+    // Clear cookies
+    clearAuthCookies(response);
+
+    return response;
   } catch (error) {
     logger.error('Logout all devices error', error);
 
