@@ -2,6 +2,7 @@
 
 import CustomerFormExample from '@/components/examples/CustomerFormExample';
 import CustomersTableExample from '@/components/examples/CustomersTableExample';
+import ZustandExample from '@/components/examples/ZustandExample';
 import { useState } from 'react';
 
 /**
@@ -10,6 +11,7 @@ import { useState } from 'react';
  * - React Hook Form + Zod for forms
  * - TanStack Query for API data management
  * - TanStack Table for data tables
+ * - Zustand for global state management
  */
 export default function LibraryExamplesPage() {
   const [activeTab, setActiveTab] = useState('table');
@@ -26,7 +28,7 @@ export default function LibraryExamplesPage() {
         </div>
 
         {/* Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">React Hook Form + Zod</h3>
             <p className="text-sm text-gray-600">
@@ -43,6 +45,12 @@ export default function LibraryExamplesPage() {
             <h3 className="text-lg font-semibold text-gray-900 mb-2">TanStack Table</h3>
             <p className="text-sm text-gray-600">
               Sorting, filtering, and pagination built-in. Headless UI for complete control.
+            </p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Zustand</h3>
+            <p className="text-sm text-gray-600">
+              Global state management without props drilling. Minimal boilerplate, localStorage persistence.
             </p>
           </div>
         </div>
@@ -71,12 +79,23 @@ export default function LibraryExamplesPage() {
               >
                 Form Example
               </button>
+              <button
+                onClick={() => setActiveTab('zustand')}
+                className={`${
+                  activeTab === 'zustand'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                State Management (Zustand)
+              </button>
             </nav>
           </div>
 
           <div className="p-6">
             {activeTab === 'table' && <CustomersTableExample />}
             {activeTab === 'form' && <CustomerFormExample />}
+            {activeTab === 'zustand' && <ZustandExample />}
           </div>
         </div>
 
