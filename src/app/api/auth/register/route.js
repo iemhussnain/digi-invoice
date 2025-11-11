@@ -23,6 +23,7 @@ import {
 import { generateUserToken, generateRefreshToken } from '@/utils/jwt';
 import { getDeviceInfo } from '@/utils/deviceFingerprint';
 import { setAuthCookies } from '@/utils/cookies';
+import { sendEmailVerificationEmail } from '@/utils/email';
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 
@@ -288,6 +289,44 @@ export async function POST(request) {
       role: user.role,
     });
 
+    // ========================================
+    // Step 4.5: Generate & Send Email Verification
+    // ========================================
+
+    // Generate cryptographically secure verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const hashedVerificationToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
+
+    // Save hashed token to user
+    user.emailVerificationToken = hashedVerificationToken;
+    user.emailVerified = false; // Explicitly set to false
+    await user.save();
+
+    // Generate verification URL
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const verifyUrl = `${appUrl}/verify-email?token=${verificationToken}`;
+
+    // Send verification email
+    const emailResult = await sendEmailVerificationEmail({
+      to: user.email,
+      name: user.name,
+      verifyUrl,
+      verifyToken: verificationToken,
+    });
+
+    if (emailResult.success) {
+      logger.success('Email verification sent', {
+        userId: user._id,
+        email: user.email,
+      });
+    } else {
+      logger.warning('Email verification failed to send', {
+        userId: user._id,
+        email: user.email,
+        error: emailResult.error,
+      });
+    }
+
     // Update organization owner (if new organization)
     if (organizationType === 'new') {
       organization.ownerId = user._id;
@@ -357,8 +396,8 @@ export async function POST(request) {
         success: true,
         message:
           organizationType === 'new'
-            ? 'Registration successful! Your organization has been created.'
-            : 'Registration successful! You have joined the organization.',
+            ? 'Registration successful! Your organization has been created. Please check your email to verify your account.'
+            : 'Registration successful! You have joined the organization. Please check your email to verify your account.',
         data: {
           user: {
             id: user._id,
@@ -367,6 +406,7 @@ export async function POST(request) {
             role: user.role,
             phone: user.phone,
             status: user.status,
+            emailVerified: user.emailVerified,
           },
           organization: {
             id: organization._id,
@@ -382,6 +422,13 @@ export async function POST(request) {
             sessionId: session.sessionId,
             expiresAt: session.expiresAt,
             device: `${deviceInfo.browser} on ${deviceInfo.os}`,
+          },
+          emailVerification: {
+            sent: emailResult.success,
+            email: user.email,
+            message: emailResult.success
+              ? 'Verification email sent. Please check your inbox.'
+              : 'Failed to send verification email. You can request a new one later.',
           },
           token,
           refreshToken,

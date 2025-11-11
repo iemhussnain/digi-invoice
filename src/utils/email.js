@@ -408,6 +408,286 @@ ${EMAIL_CONFIG.replyTo}
 }
 
 /**
+ * Send Email Verification Email
+ * @param {object} options - Email options
+ * @returns {Promise<object>}
+ */
+export async function sendEmailVerificationEmail({
+  to,
+  name,
+  verifyUrl,
+  verifyToken,
+}) {
+  const subject = 'Verify Your Email - DigInvoice ERP';
+
+  const text = `
+Hello ${name},
+
+Welcome to DigInvoice ERP!
+
+To complete your registration and start using your account, please verify your email address by clicking the link below:
+
+${verifyUrl}
+
+Or copy and paste this link into your browser:
+${verifyUrl}
+
+This verification link does not expire, but we recommend verifying as soon as possible.
+
+Why verify your email?
+- Secure your account
+- Enable password reset functionality
+- Receive important account notifications
+- Access all platform features
+
+If you did not create an account with DigInvoice ERP, please ignore this email.
+
+---
+DigInvoice ERP Team
+${EMAIL_CONFIG.replyTo}
+  `.trim();
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+      border-radius: 10px 10px 0 0;
+    }
+    .content {
+      background: #f9f9f9;
+      padding: 30px;
+      border-radius: 0 0 10px 10px;
+    }
+    .button {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 15px 30px;
+      text-decoration: none;
+      border-radius: 5px;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+    .button:hover {
+      background: #5568d3;
+    }
+    .info {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      padding: 15px;
+      margin: 20px 0;
+    }
+    .footer {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>✉️ Verify Your Email</h1>
+    <p>DigInvoice ERP</p>
+  </div>
+
+  <div class="content">
+    <p>Hello <strong>${name}</strong>,</p>
+
+    <p>Welcome to <strong>DigInvoice ERP</strong>! We're excited to have you on board.</p>
+
+    <p>To complete your registration and start using your account, please verify your email address:</p>
+
+    <p style="text-align: center;">
+      <a href="${verifyUrl}" class="button">Verify Email Address</a>
+    </p>
+
+    <p>Or copy and paste this link into your browser:</p>
+    <p style="word-break: break-all; background: #f4f4f4; padding: 10px; border-radius: 5px;">
+      ${verifyUrl}
+    </p>
+
+    <div class="info">
+      <strong>ℹ️ Why verify your email?</strong>
+      <ul style="margin: 10px 0; padding-left: 20px;">
+        <li>Secure your account</li>
+        <li>Enable password reset functionality</li>
+        <li>Receive important account notifications</li>
+        <li>Access all platform features</li>
+      </ul>
+    </div>
+
+    <p><strong>If you did not create an account:</strong></p>
+    <ul>
+      <li>Please ignore this email</li>
+      <li>No account will be created without verification</li>
+      <li>Contact us if you have concerns</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    <p>
+      <strong>DigInvoice ERP</strong><br>
+      Questions? Contact us at ${EMAIL_CONFIG.replyTo}
+    </p>
+    <p style="font-size: 11px; color: #999;">
+      This is an automated email. Please do not reply to this message.
+    </p>
+  </div>
+</body>
+</html>
+  `.trim();
+
+  return await sendEmail({ to, subject, text, html });
+}
+
+/**
+ * Send Email Verification Success Email
+ * @param {object} options - Email options
+ * @returns {Promise<object>}
+ */
+export async function sendEmailVerificationSuccessEmail({ to, name, loginUrl }) {
+  const subject = 'Email Verified Successfully - DigInvoice ERP';
+
+  const text = `
+Hello ${name},
+
+Your email address has been successfully verified!
+
+Your account is now fully activated and you can start using all features of DigInvoice ERP.
+
+Login to your account:
+${loginUrl}
+
+What you can do now:
+- Manage your organization
+- Create and track invoices
+- Generate financial reports
+- Collaborate with your team
+- And much more!
+
+Thank you for joining DigInvoice ERP!
+
+---
+DigInvoice ERP Team
+${EMAIL_CONFIG.replyTo}
+  `.trim();
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+      border-radius: 10px 10px 0 0;
+    }
+    .content {
+      background: #f9f9f9;
+      padding: 30px;
+      border-radius: 0 0 10px 10px;
+    }
+    .button {
+      display: inline-block;
+      background: #11998e;
+      color: white;
+      padding: 15px 30px;
+      text-decoration: none;
+      border-radius: 5px;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+    .success {
+      background: #d4edda;
+      border-left: 4px solid #28a745;
+      padding: 15px;
+      margin: 20px 0;
+    }
+    .footer {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>✅ Email Verified!</h1>
+    <p>DigInvoice ERP</p>
+  </div>
+
+  <div class="content">
+    <p>Hello <strong>${name}</strong>,</p>
+
+    <div class="success">
+      <strong>🎉 Success!</strong> Your email address has been verified successfully.
+    </div>
+
+    <p>Your account is now fully activated and you can start using all features of <strong>DigInvoice ERP</strong>.</p>
+
+    <p style="text-align: center;">
+      <a href="${loginUrl}" class="button">Login to Your Account</a>
+    </p>
+
+    <p><strong>What you can do now:</strong></p>
+    <ul>
+      <li>Manage your organization</li>
+      <li>Create and track invoices</li>
+      <li>Generate financial reports</li>
+      <li>Collaborate with your team</li>
+      <li>And much more!</li>
+    </ul>
+
+    <p>Thank you for joining <strong>DigInvoice ERP</strong>! If you have any questions or need help getting started, don't hesitate to reach out.</p>
+  </div>
+
+  <div class="footer">
+    <p>
+      <strong>DigInvoice ERP</strong><br>
+      Questions? Contact us at ${EMAIL_CONFIG.replyTo}
+    </p>
+    <p style="font-size: 11px; color: #999;">
+      This is an automated email. Please do not reply to this message.
+    </p>
+  </div>
+</body>
+</html>
+  `.trim();
+
+  return await sendEmail({ to, subject, text, html });
+}
+
+/**
  * Configuration Guide
  *
  * Add to .env.local:
