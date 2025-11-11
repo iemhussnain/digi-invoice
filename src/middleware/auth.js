@@ -346,3 +346,193 @@ export async function withAdmin(request, handler) {
 export async function withManager(request, handler) {
   return withAuthRole(request, ['super_admin', 'admin', 'manager'], handler);
 }
+
+// ========================================
+// Permission-Based Middleware (Fine-grained RBAC)
+// ========================================
+
+/**
+ * Permission-based authentication middleware
+ * Checks if user has specific permission(s)
+ *
+ * Usage:
+ * export async function POST(request) {
+ *   return withPermission(request, 'invoices.create', async (request) => {
+ *     // Your protected route logic here
+ *   });
+ * }
+ *
+ * // Multiple permissions (user needs ANY of them)
+ * export async function GET(request) {
+ *   return withPermission(request, ['invoices.view', 'invoices.edit'], async (request) => {
+ *     // Your protected route logic here
+ *   });
+ * }
+ */
+export async function withPermission(request, requiredPermissions, handler) {
+  return withAuth(request, async (request) => {
+    const permissions = Array.isArray(requiredPermissions)
+      ? requiredPermissions
+      : [requiredPermissions];
+
+    logger.debug('Permission check', {
+      userId: request.userId,
+      requiredPermissions: permissions,
+    });
+
+    // Check if user has any of the required permissions
+    const hasPermission = await request.user.hasAnyPermission(permissions);
+
+    if (!hasPermission) {
+      logger.warning('Permission denied', {
+        userId: request.userId,
+        email: request.user.email,
+        role: request.user.role,
+        requiredPermissions: permissions,
+      });
+
+      return errorResponse(
+        'Access denied. You do not have the required permissions for this action.',
+        403,
+        process.env.NODE_ENV === 'development'
+          ? {
+              requiredPermissions: permissions,
+              userRole: request.user.role,
+              message: 'Please contact your administrator to request access.',
+            }
+          : null
+      );
+    }
+
+    // User has permission, proceed
+    return await handler(request);
+  });
+}
+
+/**
+ * Permission-based authentication middleware (requires ALL permissions)
+ * Checks if user has all specified permissions
+ *
+ * Usage:
+ * export async function DELETE(request) {
+ *   return withAllPermissions(request, ['invoices.delete', 'invoices.approve'], async (request) => {
+ *     // User must have BOTH permissions
+ *   });
+ * }
+ */
+export async function withAllPermissions(request, requiredPermissions, handler) {
+  return withAuth(request, async (request) => {
+    const permissions = Array.isArray(requiredPermissions)
+      ? requiredPermissions
+      : [requiredPermissions];
+
+    logger.debug('All permissions check', {
+      userId: request.userId,
+      requiredPermissions: permissions,
+    });
+
+    // Check if user has all required permissions
+    const hasAllPermissions = await request.user.hasAllPermissions(permissions);
+
+    if (!hasAllPermissions) {
+      logger.warning('Insufficient permissions', {
+        userId: request.userId,
+        email: request.user.email,
+        role: request.user.role,
+        requiredPermissions: permissions,
+      });
+
+      return errorResponse(
+        'Access denied. You do not have all the required permissions for this action.',
+        403,
+        process.env.NODE_ENV === 'development'
+          ? {
+              requiredPermissions: permissions,
+              userRole: request.user.role,
+              message: 'All specified permissions are required.',
+            }
+          : null
+      );
+    }
+
+    // User has all permissions, proceed
+    return await handler(request);
+  });
+}
+
+/**
+ * Resource-based permission middleware
+ * Shorthand for checking view/create/edit/delete permissions on a resource
+ *
+ * Usage:
+ * export async function GET(request) {
+ *   return withResourcePermission(request, 'invoices', 'view', async (request) => {
+ *     // Checks for 'invoices.view' permission
+ *   });
+ * }
+ */
+export async function withResourcePermission(request, resource, action, handler) {
+  const permissionKey = `${resource}.${action}`;
+  return withPermission(request, permissionKey, handler);
+}
+
+// ========================================
+// Convenience Middleware for Common Permissions
+// ========================================
+
+// User Management
+export async function withUserView(request, handler) {
+  return withPermission(request, 'users.view', handler);
+}
+
+export async function withUserManage(request, handler) {
+  return withPermission(request, 'users.manage', handler);
+}
+
+// Customer Management
+export async function withCustomerView(request, handler) {
+  return withPermission(request, 'customers.view', handler);
+}
+
+export async function withCustomerCreate(request, handler) {
+  return withPermission(request, 'customers.create', handler);
+}
+
+export async function withCustomerEdit(request, handler) {
+  return withPermission(request, 'customers.edit', handler);
+}
+
+// Invoice Management
+export async function withInvoiceView(request, handler) {
+  return withPermission(request, 'invoices.view', handler);
+}
+
+export async function withInvoiceCreate(request, handler) {
+  return withPermission(request, 'invoices.create', handler);
+}
+
+export async function withInvoiceEdit(request, handler) {
+  return withPermission(request, 'invoices.edit', handler);
+}
+
+export async function withInvoiceApprove(request, handler) {
+  return withPermission(request, 'invoices.approve', handler);
+}
+
+// Reports
+export async function withReportsView(request, handler) {
+  return withPermission(request, 'reports.view', handler);
+}
+
+export async function withReportsExport(request, handler) {
+  return withPermission(request, 'reports.export', handler);
+}
+
+// Settings
+export async function withSettingsView(request, handler) {
+  return withPermission(request, 'settings.view', handler);
+}
+
+export async function withSettingsEdit(request, handler) {
+  return withPermission(request, 'settings.edit', handler);
+}

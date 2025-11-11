@@ -37,6 +37,14 @@ const userSchema = new mongoose.Schema(
     },
 
     // Role & Permissions
+    // Reference to Role model for dynamic RBAC
+    roleId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Role',
+      required: false, // Optional for backward compatibility during migration
+    },
+
+    // Legacy role field (for backward compatibility - will be deprecated)
     role: {
       type: String,
       enum: ['super_admin', 'admin', 'manager', 'accountant', 'sales', 'user'],
@@ -276,6 +284,110 @@ userSchema.statics.findActive = function () {
 // Static method to find by organization
 userSchema.statics.findByOrganization = function (organizationId) {
   return this.find({ organizationId, isDeleted: false });
+};
+
+// ========================================
+// RBAC Permission Methods
+// ========================================
+
+// Method to check if user has a specific permission
+userSchema.methods.hasPermission = async function (permissionKey) {
+  // Super admin has all permissions
+  if (this.role === 'super_admin') {
+    return true;
+  }
+
+  // If using new RBAC system
+  if (this.roleId) {
+    // Populate role if not populated
+    if (!this.populated('roleId')) {
+      await this.populate({
+        path: 'roleId',
+        populate: { path: 'permissions' },
+      });
+    }
+
+    if (this.roleId && this.roleId.permissions) {
+      return this.roleId.permissions.some((p) => p.key === permissionKey);
+    }
+  }
+
+  return false;
+};
+
+// Method to check if user has any of the given permissions
+userSchema.methods.hasAnyPermission = async function (permissionKeys) {
+  // Super admin has all permissions
+  if (this.role === 'super_admin') {
+    return true;
+  }
+
+  for (const key of permissionKeys) {
+    if (await this.hasPermission(key)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+// Method to check if user has all of the given permissions
+userSchema.methods.hasAllPermissions = async function (permissionKeys) {
+  // Super admin has all permissions
+  if (this.role === 'super_admin') {
+    return true;
+  }
+
+  for (const key of permissionKeys) {
+    if (!(await this.hasPermission(key))) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+// Method to get all user permissions
+userSchema.methods.getPermissions = async function () {
+  // Super admin has all permissions
+  if (this.role === 'super_admin') {
+    const Permission = mongoose.model('Permission');
+    return await Permission.find({ isActive: true });
+  }
+
+  // If using new RBAC system
+  if (this.roleId) {
+    // Populate role if not populated
+    if (!this.populated('roleId')) {
+      await this.populate({
+        path: 'roleId',
+        populate: { path: 'permissions' },
+      });
+    }
+
+    return this.roleId?.permissions || [];
+  }
+
+  return [];
+};
+
+// Method to get role information
+userSchema.methods.getRoleInfo = async function () {
+  // If using new RBAC system
+  if (this.roleId) {
+    if (!this.populated('roleId')) {
+      await this.populate('roleId');
+    }
+    return this.roleId;
+  }
+
+  // Fallback to legacy role
+  return {
+    name: this.role,
+    key: this.role,
+    isSystem: true,
+    level: this.role === 'super_admin' ? 100 : this.role === 'admin' ? 90 : 50,
+  };
 };
 
 // Prevent password from being returned in JSON
