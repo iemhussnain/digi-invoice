@@ -287,10 +287,16 @@ export default function DashboardPage() {
               ✅ Goods Receipt
             </Link>
             <Link
+              href="/admin/purchase-invoices"
+              className="bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold py-4 px-4 rounded-lg text-center transition"
+            >
+              📄 Purchase Invoices
+            </Link>
+            <Link
               href="/admin/invoices"
               className="bg-teal-50 hover:bg-teal-100 text-teal-700 font-semibold py-4 px-4 rounded-lg text-center transition"
             >
-              🧾 Invoices
+              🧾 Sales Invoices
             </Link>
             <Link
               href="/admin/vouchers"
