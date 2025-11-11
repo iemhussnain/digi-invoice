@@ -155,6 +155,12 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
+
+    deletedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      select: false,
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt automatically
