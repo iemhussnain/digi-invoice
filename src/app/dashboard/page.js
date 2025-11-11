@@ -255,7 +255,7 @@ export default function DashboardPage() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Quick Actions
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-4">
             <Link
               href="/admin/sales"
               className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold py-4 px-4 rounded-lg text-center transition border-2 border-emerald-300"
@@ -273,6 +273,12 @@ export default function DashboardPage() {
               className="bg-amber-50 hover:bg-amber-100 text-amber-700 font-semibold py-4 px-4 rounded-lg text-center transition"
             >
               🏭 Suppliers
+            </Link>
+            <Link
+              href="/admin/purchase-orders"
+              className="bg-cyan-50 hover:bg-cyan-100 text-cyan-700 font-semibold py-4 px-4 rounded-lg text-center transition"
+            >
+              📦 Purchase Orders
             </Link>
             <Link
               href="/admin/invoices"
