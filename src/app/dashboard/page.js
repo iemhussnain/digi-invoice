@@ -262,14 +262,20 @@ export default function DashboardPage() {
             >
               🔐 Roles & Permissions
             </Link>
-            <button className="bg-green-50 hover:bg-green-100 text-green-700 font-semibold py-4 px-4 rounded-lg text-center transition">
-              🛒 Sales
-            </button>
-            <button className="bg-purple-50 hover:bg-purple-100 text-purple-700 font-semibold py-4 px-4 rounded-lg text-center transition">
-              📦 Purchase
-            </button>
+            <Link
+              href="/admin/accounts"
+              className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold py-4 px-4 rounded-lg text-center transition"
+            >
+              📊 Chart of Accounts
+            </Link>
+            <Link
+              href="/admin/vouchers"
+              className="bg-green-50 hover:bg-green-100 text-green-700 font-semibold py-4 px-4 rounded-lg text-center transition"
+            >
+              📝 Vouchers
+            </Link>
             <button className="bg-orange-50 hover:bg-orange-100 text-orange-700 font-semibold py-4 px-4 rounded-lg text-center transition">
-              📋 Inventory
+              📋 Coming Soon
             </button>
           </div>
         </div>
