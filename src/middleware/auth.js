@@ -5,6 +5,7 @@
 
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
+import Organization from '@/models/Organization';
 import Session from '@/models/Session';
 import { unauthorizedError, errorResponse } from '@/utils/response';
 import logger from '@/utils/logger';

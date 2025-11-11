@@ -19,7 +19,6 @@ const sessionSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Session ID is required'],
       unique: true,
-      index: true,
     },
 
     // Device Information
@@ -132,7 +131,6 @@ const sessionSchema = new mongoose.Schema(
     expiresAt: {
       type: Date,
       required: true,
-      index: true,
     },
 
     // Logout Information
@@ -179,7 +177,6 @@ const sessionSchema = new mongoose.Schema(
 sessionSchema.index({ userId: 1, isActive: 1 });
 sessionSchema.index({ userId: 1, deviceFingerprint: 1 });
 sessionSchema.index({ sessionId: 1, isActive: 1 });
-sessionSchema.index({ expiresAt: 1 }); // For TTL cleanup
 
 // Index for automatic deletion of expired sessions (TTL index)
 sessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
