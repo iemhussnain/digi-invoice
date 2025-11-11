@@ -255,18 +255,24 @@ export default function DashboardPage() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Quick Actions
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
             <Link
-              href="/admin/roles"
-              className="bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-4 px-4 rounded-lg text-center transition"
+              href="/admin/sales"
+              className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold py-4 px-4 rounded-lg text-center transition border-2 border-emerald-300"
             >
-              🔐 Roles & Permissions
+              💵 Quick Sale
             </Link>
             <Link
-              href="/admin/accounts"
-              className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold py-4 px-4 rounded-lg text-center transition"
+              href="/admin/customers"
+              className="bg-orange-50 hover:bg-orange-100 text-orange-700 font-semibold py-4 px-4 rounded-lg text-center transition"
             >
-              📊 Chart of Accounts
+              👥 Customers
+            </Link>
+            <Link
+              href="/admin/invoices"
+              className="bg-teal-50 hover:bg-teal-100 text-teal-700 font-semibold py-4 px-4 rounded-lg text-center transition"
+            >
+              🧾 Invoices
             </Link>
             <Link
               href="/admin/vouchers"
@@ -281,16 +287,16 @@ export default function DashboardPage() {
               📈 Reports
             </Link>
             <Link
-              href="/admin/customers"
-              className="bg-orange-50 hover:bg-orange-100 text-orange-700 font-semibold py-4 px-4 rounded-lg text-center transition"
+              href="/admin/accounts"
+              className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold py-4 px-4 rounded-lg text-center transition"
             >
-              👥 Customers
+              📊 Chart of Accounts
             </Link>
             <Link
-              href="/admin/invoices"
-              className="bg-teal-50 hover:bg-teal-100 text-teal-700 font-semibold py-4 px-4 rounded-lg text-center transition"
+              href="/admin/roles"
+              className="bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-4 px-4 rounded-lg text-center transition"
             >
-              🧾 Invoices
+              🔐 Roles & Permissions
             </Link>
           </div>
         </div>
