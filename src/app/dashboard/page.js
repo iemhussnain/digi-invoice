@@ -255,7 +255,7 @@ export default function DashboardPage() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Quick Actions
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
             <Link
               href="/admin/roles"
               className="bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-4 px-4 rounded-lg text-center transition"
@@ -278,7 +278,13 @@ export default function DashboardPage() {
               href="/admin/reports"
               className="bg-purple-50 hover:bg-purple-100 text-purple-700 font-semibold py-4 px-4 rounded-lg text-center transition"
             >
-              📊 Reports
+              📈 Reports
+            </Link>
+            <Link
+              href="/admin/customers"
+              className="bg-orange-50 hover:bg-orange-100 text-orange-700 font-semibold py-4 px-4 rounded-lg text-center transition"
+            >
+              👥 Customers
             </Link>
           </div>
         </div>
