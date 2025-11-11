@@ -4,6 +4,7 @@ import AdminLayout from '@/components/layout/AdminLayout';
 import CustomerFormExample from '@/components/examples/CustomerFormExample';
 import CustomersTableExample from '@/components/examples/CustomersTableExample';
 import ZustandExample from '@/components/examples/ZustandExample';
+import FlowbiteExample from '@/components/examples/FlowbiteExample';
 import { useState } from 'react';
 
 /**
@@ -22,6 +23,7 @@ export default function LibraryExamplesPage() {
     { id: 'table', label: 'Data Table', icon: '📊', color: 'blue' },
     { id: 'form', label: 'Form Validation', icon: '📝', color: 'green' },
     { id: 'zustand', label: 'State Management', icon: '🔄', color: 'purple' },
+    { id: 'flowbite', label: 'UI Components', icon: '🎨', color: 'pink' },
   ];
 
   const libraries = [
@@ -53,6 +55,13 @@ export default function LibraryExamplesPage() {
       color: 'from-orange-500 to-red-600',
       features: ['Minimal API', 'localStorage', 'No boilerplate'],
     },
+    {
+      name: 'Flowbite React',
+      icon: '🎨',
+      description: 'Pre-built Tailwind components with accessibility',
+      color: 'from-pink-500 to-rose-600',
+      features: ['Ready-to-use', 'Accessible', 'Tailwind-based'],
+    },
   ];
 
   return (
@@ -69,7 +78,7 @@ export default function LibraryExamplesPage() {
       </div>
 
       {/* Library Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         {libraries.map((lib, index) => (
           <div
             key={lib.name}
@@ -127,6 +136,7 @@ export default function LibraryExamplesPage() {
             {activeTab === 'table' && <CustomersTableExample />}
             {activeTab === 'form' && <CustomerFormExample />}
             {activeTab === 'zustand' && <ZustandExample />}
+            {activeTab === 'flowbite' && <FlowbiteExample />}
           </div>
         </div>
       </div>
@@ -140,7 +150,7 @@ export default function LibraryExamplesPage() {
             Quick Installation
           </h3>
           <pre className="bg-black bg-opacity-50 rounded-lg p-4 overflow-x-auto text-sm">
-            <code className="text-green-400">npm install react-hook-form zod @hookform/resolvers @tanstack/react-query @tanstack/react-table zustand</code>
+            <code className="text-green-400">npm install react-hook-form zod @hookform/resolvers @tanstack/react-query @tanstack/react-table zustand flowbite flowbite-react react-icons</code>
           </pre>
         </div>
 
