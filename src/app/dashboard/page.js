@@ -274,9 +274,12 @@ export default function DashboardPage() {
             >
               📝 Vouchers
             </Link>
-            <button className="bg-orange-50 hover:bg-orange-100 text-orange-700 font-semibold py-4 px-4 rounded-lg text-center transition">
-              📋 Coming Soon
-            </button>
+            <Link
+              href="/admin/reports"
+              className="bg-purple-50 hover:bg-purple-100 text-purple-700 font-semibold py-4 px-4 rounded-lg text-center transition"
+            >
+              📊 Reports
+            </Link>
           </div>
         </div>
 
