@@ -269,6 +269,12 @@ export default function DashboardPage() {
               👥 Customers
             </Link>
             <Link
+              href="/admin/suppliers"
+              className="bg-amber-50 hover:bg-amber-100 text-amber-700 font-semibold py-4 px-4 rounded-lg text-center transition"
+            >
+              🏭 Suppliers
+            </Link>
+            <Link
               href="/admin/invoices"
               className="bg-teal-50 hover:bg-teal-100 text-teal-700 font-semibold py-4 px-4 rounded-lg text-center transition"
             >
