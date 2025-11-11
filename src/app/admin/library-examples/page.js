@@ -1,5 +1,6 @@
 'use client';
 
+import AdminLayout from '@/components/layout/AdminLayout';
 import CustomerFormExample from '@/components/examples/CustomerFormExample';
 import CustomersTableExample from '@/components/examples/CustomersTableExample';
 import ZustandExample from '@/components/examples/ZustandExample';
@@ -7,227 +8,211 @@ import { useState } from 'react';
 
 /**
  * Library Examples Page
- * Demonstrates the new libraries:
- * - React Hook Form + Zod for forms
- * - TanStack Query for API data management
- * - TanStack Table for data tables
- * - Zustand for global state management
+ * Demonstrates the new libraries with improved UI/UX
  */
 export default function LibraryExamplesPage() {
   const [activeTab, setActiveTab] = useState('table');
 
+  const breadcrumbs = [
+    { label: 'Administration', href: '/dashboard' },
+    { label: 'Library Examples' },
+  ];
+
+  const tabs = [
+    { id: 'table', label: 'Data Table', icon: '📊', color: 'blue' },
+    { id: 'form', label: 'Form Validation', icon: '📝', color: 'green' },
+    { id: 'zustand', label: 'State Management', icon: '🔄', color: 'purple' },
+  ];
+
+  const libraries = [
+    {
+      name: 'React Hook Form + Zod',
+      icon: '📝',
+      description: 'Form validation without manual useState for every field',
+      color: 'from-green-500 to-emerald-600',
+      features: ['Schema validation', 'Type-safe', 'Minimal re-renders'],
+    },
+    {
+      name: 'TanStack Query',
+      icon: '🔄',
+      description: 'Automatic caching and background refetching for APIs',
+      color: 'from-blue-500 to-cyan-600',
+      features: ['Auto caching', 'Refetching', 'Optimistic updates'],
+    },
+    {
+      name: 'TanStack Table',
+      icon: '📊',
+      description: 'Sorting, filtering, and pagination built-in',
+      color: 'from-purple-500 to-pink-600',
+      features: ['Headless UI', 'Sorting', 'Pagination'],
+    },
+    {
+      name: 'Zustand',
+      icon: '💾',
+      description: 'Global state management without props drilling',
+      color: 'from-orange-500 to-red-600',
+      features: ['Minimal API', 'localStorage', 'No boilerplate'],
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Library Examples</h1>
-          <p className="mt-2 text-gray-600">
-            Demonstration of React Hook Form, Zod, TanStack Query, and TanStack Table
+    <AdminLayout breadcrumbs={breadcrumbs}>
+      {/* Hero Section */}
+      <div className="mb-8">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-8 text-white">
+          <h1 className="text-4xl font-bold mb-3">🎨 Library Examples</h1>
+          <p className="text-blue-100 text-lg max-w-3xl">
+            Explore modern React libraries that make development faster, cleaner, and more maintainable.
+            Interactive examples with live code demonstrations.
           </p>
         </div>
+      </div>
 
-        {/* Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">React Hook Form + Zod</h3>
-            <p className="text-sm text-gray-600">
-              Form validation without manual useState for every field. Schema-based validation with Zod.
-            </p>
+      {/* Library Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {libraries.map((lib, index) => (
+          <div
+            key={lib.name}
+            className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            <div className={`h-2 bg-gradient-to-r ${lib.color}`} />
+            <div className="p-6">
+              <div className={`w-12 h-12 bg-gradient-to-br ${lib.color} rounded-lg flex items-center justify-center text-2xl mb-4 shadow-md`}>
+                {lib.icon}
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{lib.name}</h3>
+              <p className="text-sm text-gray-600 mb-4">{lib.description}</p>
+              <div className="space-y-1">
+                {lib.features.map((feature) => (
+                  <div key={feature} className="flex items-center text-xs text-gray-500">
+                    <span className="text-green-500 mr-2">✓</span>
+                    {feature}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">TanStack Query</h3>
-            <p className="text-sm text-gray-600">
-              Automatic caching, background refetching, and optimistic updates for all API calls.
-            </p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">TanStack Table</h3>
-            <p className="text-sm text-gray-600">
-              Sorting, filtering, and pagination built-in. Headless UI for complete control.
-            </p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Zustand</h3>
-            <p className="text-sm text-gray-600">
-              Global state management without props drilling. Minimal boilerplate, localStorage persistence.
-            </p>
-          </div>
+        ))}
+      </div>
+
+      {/* Interactive Examples Section */}
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        {/* Modern Tab Navigation */}
+        <div className="border-b border-gray-200 bg-gray-50">
+          <nav className="flex space-x-1 px-6" aria-label="Tabs">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative flex items-center px-6 py-4 text-sm font-medium transition-all duration-200 ${
+                  activeTab === tab.id
+                    ? 'text-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <span className="mr-2 text-lg">{tab.icon}</span>
+                {tab.label}
+                {activeTab === tab.id && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full" />
+                )}
+              </button>
+            ))}
+          </nav>
         </div>
 
-        {/* Tabs */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8 px-6" aria-label="Tabs">
-              <button
-                onClick={() => setActiveTab('table')}
-                className={`${
-                  activeTab === 'table'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-              >
-                Data Table Example
-              </button>
-              <button
-                onClick={() => setActiveTab('form')}
-                className={`${
-                  activeTab === 'form'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-              >
-                Form Example
-              </button>
-              <button
-                onClick={() => setActiveTab('zustand')}
-                className={`${
-                  activeTab === 'zustand'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-              >
-                State Management (Zustand)
-              </button>
-            </nav>
-          </div>
-
-          <div className="p-6">
+        {/* Tab Content with Smooth Transitions */}
+        <div className="p-6 lg:p-8 min-h-[600px]">
+          <div className="animate-fadeIn">
             {activeTab === 'table' && <CustomersTableExample />}
             {activeTab === 'form' && <CustomerFormExample />}
             {activeTab === 'zustand' && <ZustandExample />}
           </div>
         </div>
+      </div>
 
-        {/* Implementation Guide */}
-        <div className="mt-8 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Implementation Guide</h2>
-
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">1. Install Libraries</h3>
-              <pre className="bg-gray-900 text-gray-100 p-4 rounded-md overflow-x-auto">
-                <code>npm install react-hook-form zod @hookform/resolvers @tanstack/react-query @tanstack/react-table</code>
-              </pre>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">2. Setup Query Provider</h3>
-              <p className="text-sm text-gray-600 mb-2">
-                Wrap your app with QueryProvider in <code className="bg-gray-100 px-1 rounded">src/app/layout.js</code>
-              </p>
-              <pre className="bg-gray-900 text-gray-100 p-4 rounded-md overflow-x-auto text-sm">
-                <code>{`import QueryProvider from "@/providers/QueryProvider";
-
-export default function RootLayout({ children }) {
-  return (
-    <html lang="en">
-      <body>
-        <QueryProvider>
-          {children}
-        </QueryProvider>
-      </body>
-    </html>
-  );
-}`}</code>
-              </pre>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">3. Create Form with Zod Schema</h3>
-              <pre className="bg-gray-900 text-gray-100 p-4 rounded-md overflow-x-auto text-sm">
-                <code>{`import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-
-const schema = z.object({
-  name: z.string().min(3),
-  email: z.string().email(),
-});
-
-const { register, handleSubmit, formState: { errors } } = useForm({
-  resolver: zodResolver(schema),
-});`}</code>
-              </pre>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">4. Fetch Data with TanStack Query</h3>
-              <pre className="bg-gray-900 text-gray-100 p-4 rounded-md overflow-x-auto text-sm">
-                <code>{`import { useQuery } from '@tanstack/react-query';
-
-const { data, isLoading } = useQuery({
-  queryKey: ['customers'],
-  queryFn: () => apiGet('/customers'),
-  staleTime: 5 * 60 * 1000, // 5 minutes
-});`}</code>
-              </pre>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">5. Create Table with TanStack Table</h3>
-              <pre className="bg-gray-900 text-gray-100 p-4 rounded-md overflow-x-auto text-sm">
-                <code>{`import { useReactTable, getCoreRowModel } from '@tanstack/react-table';
-
-const table = useReactTable({
-  data: customers,
-  columns,
-  getCoreRowModel: getCoreRowModel(),
-  getSortedRowModel: getSortedRowModel(),
-  getPaginationRowModel: getPaginationRowModel(),
-});`}</code>
-              </pre>
-            </div>
-          </div>
+      {/* Quick Reference Section */}
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Installation */}
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-lg p-6 text-white">
+          <h3 className="text-xl font-bold mb-4 flex items-center">
+            <span className="mr-2">📦</span>
+            Quick Installation
+          </h3>
+          <pre className="bg-black bg-opacity-50 rounded-lg p-4 overflow-x-auto text-sm">
+            <code className="text-green-400">npm install react-hook-form zod @hookform/resolvers @tanstack/react-query @tanstack/react-table zustand</code>
+          </pre>
         </div>
 
-        {/* Benefits Comparison */}
-        <div className="mt-8 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Before vs After</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-lg font-semibold text-red-900 mb-2">❌ Before (Manual)</h3>
-              <ul className="text-sm text-gray-700 space-y-2">
-                <li>• useState for every form field</li>
-                <li>• Manual validation logic scattered everywhere</li>
-                <li>• useEffect + fetch for every API call</li>
-                <li>• Manual loading state management</li>
-                <li>• No caching - repeated API calls</li>
-                <li>• Stale data issues</li>
-                <li>• Plain HTML tables with no features</li>
-                <li>• Manual sorting/filtering implementation</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-green-900 mb-2">✅ After (Libraries)</h3>
-              <ul className="text-sm text-gray-700 space-y-2">
-                <li>• Single useForm hook for all fields</li>
-                <li>• Centralized Zod schemas for validation</li>
-                <li>• useQuery for automatic caching</li>
-                <li>• Built-in loading/error states</li>
-                <li>• Automatic background refetching</li>
-                <li>• Fresh data on window focus</li>
-                <li>• Feature-rich tables out of the box</li>
-                <li>• Built-in sorting, filtering, pagination</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Next Steps */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h2 className="text-xl font-bold text-blue-900 mb-4">Next Steps</h2>
-          <ol className="list-decimal list-inside text-sm text-blue-800 space-y-2">
-            <li>Review the example components in <code className="bg-blue-100 px-1 rounded">src/components/examples/</code></li>
-            <li>Refactor existing forms to use React Hook Form + Zod</li>
-            <li>Refactor existing tables to use TanStack Table</li>
-            <li>Replace manual fetch calls with TanStack Query hooks</li>
-            <li>Enjoy cleaner, more maintainable code!</li>
-          </ol>
+        {/* Benefits */}
+        <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl shadow-lg p-6 border border-blue-100">
+          <h3 className="text-xl font-bold mb-4 text-gray-900 flex items-center">
+            <span className="mr-2">✨</span>
+            Key Benefits
+          </h3>
+          <ul className="space-y-2 text-sm text-gray-700">
+            <li className="flex items-start">
+              <span className="text-green-500 mr-2 mt-0.5">✓</span>
+              <span><strong>90% less code</strong> for forms and tables</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-green-500 mr-2 mt-0.5">✓</span>
+              <span><strong>Automatic caching</strong> reduces API calls by 80%</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-green-500 mr-2 mt-0.5">✓</span>
+              <span><strong>Type-safe validation</strong> catches bugs early</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-green-500 mr-2 mt-0.5">✓</span>
+              <span><strong>Better performance</strong> with minimal re-renders</span>
+            </li>
+          </ul>
         </div>
       </div>
-    </div>
+
+      {/* Call to Action */}
+      <div className="mt-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl shadow-lg p-8 text-white text-center">
+        <h3 className="text-2xl font-bold mb-3">Ready to Refactor?</h3>
+        <p className="text-purple-100 mb-6 max-w-2xl mx-auto">
+          Start migrating your existing components to use these libraries. Begin with forms, then move to tables, and finally implement global state management.
+        </p>
+        <div className="flex flex-wrap justify-center gap-4">
+          <a
+            href="https://react-hook-form.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-6 py-3 bg-white text-purple-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-md"
+          >
+            📖 View Documentation
+          </a>
+          <a
+            href="https://github.com/iemhussnain/digi-invoice"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-6 py-3 bg-purple-700 text-white rounded-lg font-semibold hover:bg-purple-800 transition-colors shadow-md"
+          >
+            💻 See Full Code
+          </a>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+      `}</style>
+    </AdminLayout>
   );
 }
