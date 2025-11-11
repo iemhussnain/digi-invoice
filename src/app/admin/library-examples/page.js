@@ -5,6 +5,7 @@ import CustomerFormExample from '@/components/examples/CustomerFormExample';
 import CustomersTableExample from '@/components/examples/CustomersTableExample';
 import ZustandExample from '@/components/examples/ZustandExample';
 import FlowbiteExample from '@/components/examples/FlowbiteExample';
+import DatePickerExample from '@/components/examples/DatePickerExample';
 import { useState } from 'react';
 
 /**
@@ -24,6 +25,7 @@ export default function LibraryExamplesPage() {
     { id: 'form', label: 'Form Validation', icon: '📝', color: 'green' },
     { id: 'zustand', label: 'State Management', icon: '🔄', color: 'purple' },
     { id: 'flowbite', label: 'UI Components', icon: '🎨', color: 'pink' },
+    { id: 'datepicker', label: 'Date Pickers', icon: '📅', color: 'indigo' },
   ];
 
   const libraries = [
@@ -62,6 +64,13 @@ export default function LibraryExamplesPage() {
       color: 'from-pink-500 to-rose-600',
       features: ['Ready-to-use', 'Accessible', 'Tailwind-based'],
     },
+    {
+      name: 'React Datepicker',
+      icon: '📅',
+      description: 'Visual calendar picker with date-fns integration',
+      color: 'from-indigo-500 to-blue-600',
+      features: ['Date ranges', 'Time picker', 'Date filtering'],
+    },
   ];
 
   return (
@@ -78,7 +87,7 @@ export default function LibraryExamplesPage() {
       </div>
 
       {/* Library Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {libraries.map((lib, index) => (
           <div
             key={lib.name}
@@ -137,6 +146,7 @@ export default function LibraryExamplesPage() {
             {activeTab === 'form' && <CustomerFormExample />}
             {activeTab === 'zustand' && <ZustandExample />}
             {activeTab === 'flowbite' && <FlowbiteExample />}
+            {activeTab === 'datepicker' && <DatePickerExample />}
           </div>
         </div>
       </div>
@@ -150,7 +160,7 @@ export default function LibraryExamplesPage() {
             Quick Installation
           </h3>
           <pre className="bg-black bg-opacity-50 rounded-lg p-4 overflow-x-auto text-sm">
-            <code className="text-green-400">npm install react-hook-form zod @hookform/resolvers @tanstack/react-query @tanstack/react-table zustand flowbite flowbite-react react-icons</code>
+            <code className="text-green-400">npm install react-hook-form zod @hookform/resolvers @tanstack/react-query @tanstack/react-table zustand flowbite flowbite-react react-icons react-datepicker date-fns</code>
           </pre>
         </div>
 
