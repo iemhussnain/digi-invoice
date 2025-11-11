@@ -6,6 +6,7 @@ import CustomersTableExample from '@/components/examples/CustomersTableExample';
 import ZustandExample from '@/components/examples/ZustandExample';
 import FlowbiteExample from '@/components/examples/FlowbiteExample';
 import DatePickerExample from '@/components/examples/DatePickerExample';
+import PDFExample from '@/components/examples/PDFExample';
 import { useState } from 'react';
 
 /**
@@ -26,6 +27,7 @@ export default function LibraryExamplesPage() {
     { id: 'zustand', label: 'State Management', icon: '🔄', color: 'purple' },
     { id: 'flowbite', label: 'UI Components', icon: '🎨', color: 'pink' },
     { id: 'datepicker', label: 'Date Pickers', icon: '📅', color: 'indigo' },
+    { id: 'pdf', label: 'PDF Generation', icon: '📄', color: 'red' },
   ];
 
   const libraries = [
@@ -70,6 +72,13 @@ export default function LibraryExamplesPage() {
       description: 'Visual calendar picker with date-fns integration',
       color: 'from-indigo-500 to-blue-600',
       features: ['Date ranges', 'Time picker', 'Date filtering'],
+    },
+    {
+      name: '@react-pdf/renderer',
+      icon: '📄',
+      description: 'Generate professional PDFs from React components',
+      color: 'from-red-500 to-orange-600',
+      features: ['Invoices', 'Reports', 'Vouchers'],
     },
   ];
 
@@ -147,6 +156,7 @@ export default function LibraryExamplesPage() {
             {activeTab === 'zustand' && <ZustandExample />}
             {activeTab === 'flowbite' && <FlowbiteExample />}
             {activeTab === 'datepicker' && <DatePickerExample />}
+            {activeTab === 'pdf' && <PDFExample />}
           </div>
         </div>
       </div>
@@ -160,7 +170,7 @@ export default function LibraryExamplesPage() {
             Quick Installation
           </h3>
           <pre className="bg-black bg-opacity-50 rounded-lg p-4 overflow-x-auto text-sm">
-            <code className="text-green-400">npm install react-hook-form zod @hookform/resolvers @tanstack/react-query @tanstack/react-table zustand flowbite flowbite-react react-icons react-datepicker date-fns</code>
+            <code className="text-green-400">npm install react-hook-form zod @hookform/resolvers @tanstack/react-query @tanstack/react-table zustand flowbite flowbite-react react-icons react-datepicker date-fns @react-pdf/renderer</code>
           </pre>
         </div>
 
