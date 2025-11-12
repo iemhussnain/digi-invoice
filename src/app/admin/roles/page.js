@@ -1,48 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { showSuccess, showError } from '@/utils/toast';
+import { useRoles, useDeleteRole } from '@/hooks/useRoles';
 
 export default function RolesManagementPage() {
-  const [roles, setRoles] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedRole, setSelectedRole] = useState(null);
   const [filterType, setFilterType] = useState('all'); // all, system, custom
 
-  useEffect(() => {
-    fetchRoles();
-  }, [filterType]);
+  const { data, isLoading, isError, error } = useRoles({ type: filterType, includePermissions: true });
+  const deleteRole = useDeleteRole();
 
-  const fetchRoles = async () => {
-    try {
-      setLoading(true);
-      setError('');
-
-      let url = '/api/rbac/roles?includePermissions=true';
-      if (filterType !== 'all') {
-        url += `&type=${filterType}`;
-      }
-
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (data.success) {
-        setRoles(data.data.roles);
-      } else {
-        setError(data.message || 'Failed to fetch roles');
-      }
-    } catch (err) {
-      console.error('Fetch roles error:', err);
-      setError('Network error. Please check your connection.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const roles = data?.roles || [];
 
   const handleCreateRole = () => {
     setShowCreateModal(true);
@@ -58,25 +31,17 @@ export default function RolesManagementPage() {
     setShowDeleteModal(true);
   };
 
-  const confirmDeleteRole = async () => {
-    try {
-      const response = await fetch(`/api/rbac/roles/${selectedRole.id}`, {
-        method: 'DELETE',
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
+  const confirmDeleteRole = () => {
+    deleteRole.mutate(selectedRole.id, {
+      onSuccess: () => {
         setShowDeleteModal(false);
         setSelectedRole(null);
-        await fetchRoles();
-      } else {
-        showError(data.message || 'Failed to delete role');
-      }
-    } catch (err) {
-      console.error('Delete role error:', err);
-      showError('Network error. Please try again.');
-    }
+        showSuccess('Role deleted successfully');
+      },
+      onError: (error) => {
+        showError(error.message || 'Failed to delete role');
+      },
+    });
   };
 
   const getRoleLevelBadge = (level) => {
@@ -239,14 +204,14 @@ export default function RolesManagementPage() {
 
       {/* Roles List */}
       <div className="max-w-7xl mx-auto">
-        {loading && (
+        {isLoading && (
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             <p className="mt-4 text-gray-600">Loading roles...</p>
           </div>
         )}
 
-        {error && (
+        {isError && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
             <div className="flex items-center">
               <svg
@@ -260,12 +225,12 @@ export default function RolesManagementPage() {
                   clipRule="evenodd"
                 />
               </svg>
-              <p className="text-sm text-red-700">{error}</p>
+              <p className="text-sm text-red-700">{error?.message}</p>
             </div>
           </div>
         )}
 
-        {!loading && !error && roles.length === 0 && (
+        {!isLoading && !isError && roles.length === 0 && (
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <svg
               className="w-16 h-16 text-gray-400 mx-auto mb-4"
@@ -291,7 +256,7 @@ export default function RolesManagementPage() {
           </div>
         )}
 
-        {!loading && !error && roles.length > 0 && (
+        {!isLoading && !isError && roles.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {roles.map((role) => {
               const levelBadge = getRoleLevelBadge(role.level);

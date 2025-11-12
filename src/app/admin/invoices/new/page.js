@@ -4,12 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CustomerSelect } from '@/components/ui/SearchableSelect';
+import { useCreateInvoice } from '@/hooks/useInvoices';
 
 export default function NewInvoicePage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [customerOption, setCustomerOption] = useState(null);
+  const createInvoice = useCreateInvoice();
 
   const [formData, setFormData] = useState({
     customerId: '',
@@ -76,53 +76,31 @@ export default function NewInvoicePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
 
-    try {
-      const token = localStorage.getItem('token');
+    const invoiceData = {
+      ...formData,
+      items: items.map((item) => ({
+        ...item,
+        quantity: parseFloat(item.quantity),
+        rate: parseFloat(item.rate),
+        taxRate: parseFloat(item.taxRate || 0),
+        discountRate: parseFloat(item.discountRate || 0),
+      })),
+      subtotal: totals.subtotal,
+      totalDiscount: totals.totalDiscount,
+      taxableAmount: totals.taxableAmount,
+      totalTax: totals.totalTax,
+      totalAmount: totals.totalAmount,
+      shippingCharges: parseFloat(formData.shippingCharges || 0),
+      otherCharges: parseFloat(formData.otherCharges || 0),
+      taxRate: parseFloat(formData.taxRate || 0),
+    };
 
-      const invoiceData = {
-        ...formData,
-        items: items.map((item) => ({
-          ...item,
-          quantity: parseFloat(item.quantity),
-          rate: parseFloat(item.rate),
-          taxRate: parseFloat(item.taxRate || 0),
-          discountRate: parseFloat(item.discountRate || 0),
-        })),
-        subtotal: totals.subtotal,
-        totalDiscount: totals.totalDiscount,
-        taxableAmount: totals.taxableAmount,
-        totalTax: totals.totalTax,
-        totalAmount: totals.totalAmount,
-        shippingCharges: parseFloat(formData.shippingCharges || 0),
-        otherCharges: parseFloat(formData.otherCharges || 0),
-        taxRate: parseFloat(formData.taxRate || 0),
-      };
-
-      const response = await fetch('/api/invoices', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(invoiceData),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
+    createInvoice.mutate(invoiceData, {
+      onSuccess: () => {
         router.push('/admin/invoices');
-      } else {
-        setError(data.message || 'Failed to create invoice');
-      }
-    } catch (err) {
-      setError('Failed to create invoice. Please try again.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+      },
+    });
   };
 
   const formatCurrency = (amount) => {
@@ -148,9 +126,11 @@ export default function NewInvoicePage() {
           </div>
         </div>
 
-        {error && (
+        {createInvoice.isError && (
           <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-800 font-medium">{error}</p>
+            <p className="text-red-800 font-medium">
+              {createInvoice.error?.message || 'Failed to create invoice'}
+            </p>
           </div>
         )}
 
@@ -427,10 +407,10 @@ export default function NewInvoicePage() {
             </Link>
             <button
               type="submit"
-              disabled={loading}
+              disabled={createInvoice.isPending}
               className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300"
             >
-              {loading ? 'Creating...' : 'Create Invoice'}
+              {createInvoice.isPending ? 'Creating...' : 'Create Invoice'}
             </button>
           </div>
         </form>

@@ -3,14 +3,15 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useSupplier, useUpdateSupplier } from '@/hooks/useSuppliers';
 
 export default function EditSupplierPage({ params }) {
   const router = useRouter();
   const { id } = params;
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
   const [errors, setErrors] = useState({});
+
+  const { data: supplierData, isLoading, isError, error } = useSupplier(id);
+  const updateSupplier = useUpdateSupplier();
 
   const [formData, setFormData] = useState({
     supplierCode: '',
@@ -44,59 +45,43 @@ export default function EditSupplierPage({ params }) {
     iban: '',
   });
 
+  // Populate form when supplier data loads
   useEffect(() => {
-    fetchSupplier();
-  }, [id]);
-
-  const fetchSupplier = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/suppliers/${id}`);
-      const data = await response.json();
-
-      if (data.success) {
-        const supplier = data.data.supplier;
-        setFormData({
-          supplierCode: supplier.supplierCode || '',
-          companyName: supplier.companyName || '',
-          contactPerson: supplier.contactPerson || '',
-          email: supplier.email || '',
-          phone: supplier.phone || '',
-          mobile: supplier.mobile || '',
-          website: supplier.website || '',
-          ntn: supplier.ntn || '',
-          strn: supplier.strn || '',
-          gstRegistered: supplier.gstRegistered || false,
-          paymentTerms: supplier.paymentTerms || 'credit',
-          creditDays: supplier.creditDays || 30,
-          creditLimit: supplier.creditLimit || 0,
-          openingBalance: supplier.openingBalance || 0,
-          balanceType: supplier.balanceType || 'credit',
-          category: supplier.category || 'other',
-          isActive: supplier.isActive !== undefined ? supplier.isActive : true,
-          notes: supplier.notes || '',
-          // Address
-          street: supplier.address?.street || '',
-          city: supplier.address?.city || '',
-          state: supplier.address?.state || '',
-          postalCode: supplier.address?.postalCode || '',
-          country: supplier.address?.country || 'Pakistan',
-          // Bank details
-          bankName: supplier.bankName || '',
-          accountTitle: supplier.accountTitle || '',
-          accountNumber: supplier.accountNumber || '',
-          iban: supplier.iban || '',
-        });
-      } else {
-        setError(data.message || 'Failed to fetch supplier');
-      }
-    } catch (err) {
-      setError('Failed to fetch supplier');
-      console.error('Error fetching supplier:', err);
-    } finally {
-      setLoading(false);
+    if (supplierData?.supplier) {
+      const supplier = supplierData.supplier;
+      setFormData({
+        supplierCode: supplier.supplierCode || '',
+        companyName: supplier.companyName || '',
+        contactPerson: supplier.contactPerson || '',
+        email: supplier.email || '',
+        phone: supplier.phone || '',
+        mobile: supplier.mobile || '',
+        website: supplier.website || '',
+        ntn: supplier.ntn || '',
+        strn: supplier.strn || '',
+        gstRegistered: supplier.gstRegistered || false,
+        paymentTerms: supplier.paymentTerms || 'credit',
+        creditDays: supplier.creditDays || 30,
+        creditLimit: supplier.creditLimit || 0,
+        openingBalance: supplier.openingBalance || 0,
+        balanceType: supplier.balanceType || 'credit',
+        category: supplier.category || 'other',
+        isActive: supplier.isActive !== undefined ? supplier.isActive : true,
+        notes: supplier.notes || '',
+        // Address
+        street: supplier.address?.street || '',
+        city: supplier.address?.city || '',
+        state: supplier.address?.state || '',
+        postalCode: supplier.address?.postalCode || '',
+        country: supplier.address?.country || 'Pakistan',
+        // Bank details
+        bankName: supplier.bankName || '',
+        accountTitle: supplier.accountTitle || '',
+        accountNumber: supplier.accountNumber || '',
+        iban: supplier.iban || '',
+      });
     }
-  };
+  }, [supplierData]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -112,76 +97,79 @@ export default function EditSupplierPage({ params }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSaving(true);
-    setError('');
     setErrors({});
 
-    try {
-      // Build address object
-      const address = {
-        street: formData.street,
-        city: formData.city,
-        state: formData.state,
-        postalCode: formData.postalCode,
-        country: formData.country,
-      };
+    // Build address object
+    const address = {
+      street: formData.street,
+      city: formData.city,
+      state: formData.state,
+      postalCode: formData.postalCode,
+      country: formData.country,
+    };
 
-      // Build supplier data
-      const supplierData = {
-        companyName: formData.companyName,
-        contactPerson: formData.contactPerson,
-        email: formData.email,
-        phone: formData.phone,
-        mobile: formData.mobile,
-        website: formData.website,
-        ntn: formData.ntn,
-        strn: formData.strn,
-        gstRegistered: formData.gstRegistered,
-        paymentTerms: formData.paymentTerms,
-        creditDays: parseInt(formData.creditDays) || 0,
-        creditLimit: parseFloat(formData.creditLimit) || 0,
-        openingBalance: parseFloat(formData.openingBalance) || 0,
-        balanceType: formData.balanceType,
-        category: formData.category,
-        isActive: formData.isActive,
-        notes: formData.notes,
-        address,
-        bankName: formData.bankName,
-        accountTitle: formData.accountTitle,
-        accountNumber: formData.accountNumber,
-        iban: formData.iban,
-      };
+    // Build supplier data
+    const supplierDataToUpdate = {
+      companyName: formData.companyName,
+      contactPerson: formData.contactPerson,
+      email: formData.email,
+      phone: formData.phone,
+      mobile: formData.mobile,
+      website: formData.website,
+      ntn: formData.ntn,
+      strn: formData.strn,
+      gstRegistered: formData.gstRegistered,
+      paymentTerms: formData.paymentTerms,
+      creditDays: parseInt(formData.creditDays) || 0,
+      creditLimit: parseFloat(formData.creditLimit) || 0,
+      openingBalance: parseFloat(formData.openingBalance) || 0,
+      balanceType: formData.balanceType,
+      category: formData.category,
+      isActive: formData.isActive,
+      notes: formData.notes,
+      address,
+      bankName: formData.bankName,
+      accountTitle: formData.accountTitle,
+      accountNumber: formData.accountNumber,
+      iban: formData.iban,
+    };
 
-      const response = await fetch(`/api/suppliers/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
+    updateSupplier.mutate(
+      { supplierId: id, supplierData: supplierDataToUpdate },
+      {
+        onSuccess: () => {
+          router.push('/admin/suppliers');
         },
-        body: JSON.stringify(supplierData),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        router.push('/admin/suppliers');
-      } else {
-        if (data.data?.errors) {
-          setErrors(data.data.errors);
-        }
-        setError(data.message || 'Failed to update supplier');
+        onError: (error) => {
+          // Handle validation errors from API
+          if (error.response?.data?.errors) {
+            setErrors(error.response.data.errors);
+          }
+        },
       }
-    } catch (err) {
-      setError('Failed to update supplier');
-      console.error('Error updating supplier:', err);
-    } finally {
-      setSaving(false);
-    }
+    );
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-6 max-w-4xl mx-auto">
+        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+          {error?.message || 'Failed to load supplier'}
+        </div>
+        <Link
+          href="/admin/suppliers"
+          className="inline-block mt-4 px-4 py-2 text-gray-600 hover:text-gray-900 font-medium"
+        >
+          ← Back to Suppliers
+        </Link>
       </div>
     );
   }
@@ -201,9 +189,9 @@ export default function EditSupplierPage({ params }) {
       </div>
 
       {/* Error Message */}
-      {error && (
+      {updateSupplier.isError && (
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
-          {error}
+          {updateSupplier.error?.message || 'Failed to update supplier'}
         </div>
       )}
 
@@ -658,10 +646,10 @@ export default function EditSupplierPage({ params }) {
         <div className="flex gap-4">
           <button
             type="submit"
-            disabled={saving}
+            disabled={updateSupplier.isPending}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? 'Saving...' : 'Save Changes'}
+            {updateSupplier.isPending ? 'Saving...' : 'Save Changes'}
           </button>
           <Link
             href="/admin/suppliers"

@@ -4,13 +4,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { SupplierSelect } from '@/components/ui/SearchableSelect';
+import { useCreatePurchaseOrder } from '@/hooks/usePurchaseOrders';
 
 export default function NewPurchaseOrderPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [errors, setErrors] = useState({});
   const [supplierOption, setSupplierOption] = useState(null);
+  const createPurchaseOrder = useCreatePurchaseOrder();
 
   const [formData, setFormData] = useState({
     poNumber: '',
@@ -122,69 +122,53 @@ export default function NewPurchaseOrderPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
     setErrors({});
 
-    try {
-      // Build delivery address
-      const deliveryAddress = {
-        street: formData.deliveryStreet,
-        city: formData.deliveryCity,
-        state: formData.deliveryState,
-        postalCode: formData.deliveryPostalCode,
-        country: formData.deliveryCountry,
-      };
+    // Build delivery address
+    const deliveryAddress = {
+      street: formData.deliveryStreet,
+      city: formData.deliveryCity,
+      state: formData.deliveryState,
+      postalCode: formData.deliveryPostalCode,
+      country: formData.deliveryCountry,
+    };
 
-      // Build PO data
-      const poData = {
-        poNumber: formData.poNumber || undefined,
-        poDate: formData.poDate,
-        supplierId: formData.supplierId,
-        deliveryDate: formData.deliveryDate || undefined,
-        paymentTerms: formData.paymentTerms,
-        taxType: formData.taxType,
-        taxRate: parseFloat(formData.taxRate) || 0,
-        shippingCharges: parseFloat(formData.shippingCharges) || 0,
-        otherCharges: parseFloat(formData.otherCharges) || 0,
-        notes: formData.notes,
-        internalNotes: formData.internalNotes,
-        terms: formData.terms,
-        deliveryAddress,
-        items: items.map((item) => ({
-          description: item.description,
-          quantity: parseFloat(item.quantity),
-          unit: item.unit,
-          rate: parseFloat(item.rate),
-          taxRate: parseFloat(item.taxRate) || 0,
-          discountRate: parseFloat(item.discountRate) || 0,
-        })),
-      };
+    // Build PO data
+    const poData = {
+      poNumber: formData.poNumber || undefined,
+      poDate: formData.poDate,
+      supplierId: formData.supplierId,
+      deliveryDate: formData.deliveryDate || undefined,
+      paymentTerms: formData.paymentTerms,
+      taxType: formData.taxType,
+      taxRate: parseFloat(formData.taxRate) || 0,
+      shippingCharges: parseFloat(formData.shippingCharges) || 0,
+      otherCharges: parseFloat(formData.otherCharges) || 0,
+      notes: formData.notes,
+      internalNotes: formData.internalNotes,
+      terms: formData.terms,
+      deliveryAddress,
+      items: items.map((item) => ({
+        description: item.description,
+        quantity: parseFloat(item.quantity),
+        unit: item.unit,
+        rate: parseFloat(item.rate),
+        taxRate: parseFloat(item.taxRate) || 0,
+        discountRate: parseFloat(item.discountRate) || 0,
+      })),
+    };
 
-      const response = await fetch('/api/purchase-orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(poData),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
+    createPurchaseOrder.mutate(poData, {
+      onSuccess: () => {
         router.push('/admin/purchase-orders');
-      } else {
-        if (data.data?.errors) {
-          setErrors(data.data.errors);
+      },
+      onError: (error) => {
+        // Handle validation errors from API
+        if (error.response?.data?.errors) {
+          setErrors(error.response.data.errors);
         }
-        setError(data.message || 'Failed to create purchase order');
-      }
-    } catch (err) {
-      setError('Failed to create purchase order');
-      console.error('Error creating purchase order:', err);
-    } finally {
-      setLoading(false);
-    }
+      },
+    });
   };
 
   const totals = calculateTotals();
@@ -204,9 +188,9 @@ export default function NewPurchaseOrderPage() {
       </div>
 
       {/* Error Message */}
-      {error && (
+      {createPurchaseOrder.isError && (
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
-          {error}
+          {createPurchaseOrder.error?.message || 'Failed to create purchase order'}
         </div>
       )}
 
@@ -612,10 +596,10 @@ export default function NewPurchaseOrderPage() {
             <div className="flex gap-4">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={createPurchaseOrder.isPending}
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Creating...' : 'Create Purchase Order'}
+                {createPurchaseOrder.isPending ? 'Creating...' : 'Create Purchase Order'}
               </button>
               <Link
                 href="/admin/purchase-orders"
