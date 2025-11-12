@@ -40,10 +40,14 @@ export const registerSchema = z.object({
     .refine((val) => !val || /^[\d\s\-\+\(\)]+$/.test(val), {
       message: 'Invalid phone number format',
     }),
-  organizationName: z
-    .string()
-    .min(1, 'Organization name is required')
-    .min(2, 'Organization name must be at least 2 characters'),
+  organizationType: z.enum(['new', 'existing']).default('new'),
+  companyName: z.string().optional(),
+  companyEmail: z.string().email('Invalid email address').optional().or(z.literal('')),
+  companyPhone: z.string().optional(),
+  companyCity: z.string().optional(),
+  companyProvince: z.string().optional(),
+  ntn: z.string().optional(),
+  strn: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],
