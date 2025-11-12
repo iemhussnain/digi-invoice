@@ -6,79 +6,45 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { exportPurchaseReport } from '@/utils/excelExport';
 import { showSuccess, showError } from '@/utils/toast';
+import { usePurchaseOrders, useDeletePurchaseOrder, useSendPurchaseOrder } from '@/hooks/usePurchaseOrders';
+import { useSuppliers } from '@/hooks/useSuppliers';
 
 export default function PurchaseOrdersPage() {
   const router = useRouter();
-  const [purchaseOrders, setPurchaseOrders] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [supplierId, setSupplierId] = useState('');
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 50,
-    total: 0,
-    pages: 0,
-  });
+  const [page, setPage] = useState(1);
 
   // Send modal state
   const [sendModal, setSendModal] = useState({ open: false, po: null, email: '' });
-  const [sending, setSending] = useState(false);
 
-  useEffect(() => {
-    fetchSuppliers();
-  }, []);
+  // React Query hooks
+  const { data: poData, isLoading, error } = usePurchaseOrders({
+    page,
+    search,
+    status,
+    supplierId
+  });
 
-  useEffect(() => {
-    fetchPurchaseOrders();
-  }, [pagination.page, search, status, supplierId]);
+  const { data: suppliersData } = useSuppliers({
+    page: 1,
+    search: '',
+    isActive: '',
+    category: '',
+    paymentTerms: ''
+  });
 
-  const fetchSuppliers = async () => {
-    try {
-      const response = await fetch('/api/suppliers?limit=1000');
-      const data = await response.json();
-      if (data.success) {
-        setSuppliers(data.data.suppliers);
-      }
-    } catch (err) {
-      console.error('Error fetching suppliers:', err);
-    }
-  };
+  const deleteMutation = useDeletePurchaseOrder();
+  const sendMutation = useSendPurchaseOrder();
 
-  const fetchPurchaseOrders = async () => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams({
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString(),
-        ...(search && { search }),
-        ...(status && { status }),
-        ...(supplierId && { supplierId }),
-      });
-
-      const response = await fetch(`/api/purchase-orders?${params}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setPurchaseOrders(data.data.purchaseOrders);
-        setPagination(data.data.pagination);
-      } else {
-        setError(data.message || 'Failed to fetch purchase orders');
-      }
-    } catch (err) {
-      setError('Failed to fetch purchase orders');
-      console.error('Error fetching purchase orders:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const purchaseOrders = poData?.purchaseOrders || [];
+  const pagination = poData?.pagination || { page: 1, limit: 50, total: 0, pages: 0 };
+  const suppliers = suppliersData?.suppliers || [];
 
   const handleSearch = (e) => {
     e.preventDefault();
-    setPagination({ ...pagination, page: 1 });
-    fetchPurchaseOrders();
+    setPage(1);
   };
 
   const handleDelete = async (id) => {
@@ -87,20 +53,10 @@ export default function PurchaseOrdersPage() {
     }
 
     try {
-      const response = await fetch(`/api/purchase-orders/${id}`, {
-        method: 'DELETE',
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        fetchPurchaseOrders();
-      } else {
-        showError(data.message || 'Failed to delete purchase order');
-      }
+      await deleteMutation.mutateAsync(id);
+      showSuccess('Purchase order deleted successfully');
     } catch (err) {
-      showError('Failed to delete purchase order');
-      console.error('Error deleting purchase order:', err);
+      showError(err.message || 'Failed to delete purchase order');
     }
   };
 
@@ -121,29 +77,14 @@ export default function PurchaseOrdersPage() {
     }
 
     try {
-      setSending(true);
-      const response = await fetch(`/api/purchase-orders/${sendModal.po._id}/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: sendModal.email }),
+      await sendMutation.mutateAsync({
+        poId: sendModal.po._id,
+        email: sendModal.email
       });
-
-      const data = await response.json();
-
-      if (data.success) {
-        showSuccess(`Purchase order sent successfully to ${sendModal.email}`);
-        setSendModal({ open: false, po: null, email: '' });
-        fetchPurchaseOrders();
-      } else {
-        showError(data.message || 'Failed to send purchase order');
-      }
+      showSuccess(`Purchase order sent successfully to ${sendModal.email}`);
+      setSendModal({ open: false, po: null, email: '' });
     } catch (err) {
-      showError('Failed to send purchase order');
-      console.error('Error sending purchase order:', err);
-    } finally {
-      setSending(false);
+      showError(err.message || 'Failed to send purchase order');
     }
   };
 
@@ -186,7 +127,7 @@ export default function PurchaseOrdersPage() {
     );
   };
 
-  if (loading && purchaseOrders.length === 0) {
+  if (isLoading && purchaseOrders.length === 0) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -226,7 +167,7 @@ export default function PurchaseOrdersPage() {
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4">
-          {error}
+          {error.message}
         </div>
       )}
 
@@ -257,7 +198,7 @@ export default function PurchaseOrdersPage() {
                 value={status}
                 onChange={(e) => {
                   setStatus(e.target.value);
-                  setPagination({ ...pagination, page: 1 });
+                  setPage(1);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
@@ -280,7 +221,7 @@ export default function PurchaseOrdersPage() {
                 value={supplierId}
                 onChange={(e) => {
                   setSupplierId(e.target.value);
-                  setPagination({ ...pagination, page: 1 });
+                  setPage(1);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
@@ -307,7 +248,7 @@ export default function PurchaseOrdersPage() {
                 setSearch('');
                 setStatus('');
                 setSupplierId('');
-                setPagination({ ...pagination, page: 1 });
+                setPage(1);
               }}
               className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition"
             >
@@ -429,19 +370,15 @@ export default function PurchaseOrdersPage() {
             </div>
             <div className="flex gap-2">
               <button
-                onClick={() =>
-                  setPagination({ ...pagination, page: pagination.page - 1 })
-                }
-                disabled={pagination.page === 1}
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Previous
               </button>
               <button
-                onClick={() =>
-                  setPagination({ ...pagination, page: pagination.page + 1 })
-                }
-                disabled={pagination.page >= pagination.pages}
+                onClick={() => setPage(page + 1)}
+                disabled={page >= pagination.pages}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
@@ -507,16 +444,16 @@ export default function PurchaseOrdersPage() {
               <button
                 onClick={() => setSendModal({ open: false, po: null, email: '' })}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-                disabled={sending}
+                disabled={sendMutation.isPending}
               >
                 Cancel
               </button>
               <button
                 onClick={handleSendPO}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                disabled={sending}
+                disabled={sendMutation.isPending}
               >
-                {sending ? 'Sending...' : 'Send'}
+                {sendMutation.isPending ? 'Sending...' : 'Send'}
               </button>
             </div>
           </div>

@@ -5,13 +5,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { showSuccess, showError } from '@/utils/toast';
+import { AccountSelect } from '@/components/ui/SearchableSelect';
 
 export default function NewVoucherPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [accounts, setAccounts] = useState([]);
 
   const [formData, setFormData] = useState({
     voucherType: 'JV',
@@ -22,50 +22,16 @@ export default function NewVoucherPage() {
   });
 
   const [entries, setEntries] = useState([
-    { accountId: '', type: 'debit', amount: '', description: '' },
-    { accountId: '', type: 'credit', amount: '', description: '' },
+    { accountId: '', accountOption: null, type: 'debit', amount: '', description: '' },
+    { accountId: '', accountOption: null, type: 'credit', amount: '', description: '' },
   ]);
 
   const [errors, setErrors] = useState({});
   const [totals, setTotals] = useState({ debit: 0, credit: 0, difference: 0 });
 
   useEffect(() => {
-    fetchAccounts();
-  }, []);
-
-  useEffect(() => {
     calculateTotals();
   }, [entries]);
-
-  const fetchAccounts = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/login');
-        return;
-      }
-
-      const response = await fetch('/api/accounts', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.status === 401) {
-        router.push('/login');
-        return;
-      }
-
-      const data = await response.json();
-      if (data.success) {
-        // Filter out group accounts (only show leaf accounts)
-        const leafAccounts = data.data.accounts.filter(acc => !acc.isGroup && acc.isActive);
-        setAccounts(leafAccounts);
-      }
-    } catch (err) {
-      console.error('Error fetching accounts:', err);
-    }
-  };
 
   const calculateTotals = () => {
     let debitTotal = 0;
@@ -112,7 +78,7 @@ export default function NewVoucherPage() {
   };
 
   const addEntry = (type) => {
-    setEntries([...entries, { accountId: '', type, amount: '', description: '' }]);
+    setEntries([...entries, { accountId: '', accountOption: null, type, amount: '', description: '' }]);
   };
 
   const removeEntry = (index) => {
@@ -403,20 +369,19 @@ export default function NewVoucherPage() {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Account <span className="text-red-500">*</span>
                         </label>
-                        <select
-                          value={entry.accountId}
-                          onChange={(e) => handleEntryChange(index, 'accountId', e.target.value)}
-                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                            errors[`entry_${index}_account`] ? 'border-red-500' : 'border-gray-300'
-                          }`}
-                        >
-                          <option value="">Select Account</option>
-                          {accounts.map((account) => (
-                            <option key={account._id} value={account._id}>
-                              {account.code} - {account.name}
-                            </option>
-                          ))}
-                        </select>
+                        <AccountSelect
+                          value={entry.accountOption}
+                          onChange={(selectedOption) => {
+                            const newEntries = [...entries];
+                            newEntries[index].accountId = selectedOption?.value || '';
+                            newEntries[index].accountOption = selectedOption;
+                            setEntries(newEntries);
+                          }}
+                          error={!!errors[`entry_${index}_account`]}
+                        />
+                        {errors[`entry_${index}_account`] && (
+                          <p className="mt-1 text-sm text-red-600">{errors[`entry_${index}_account`]}</p>
+                        )}
                       </div>
 
                       {/* Type */}

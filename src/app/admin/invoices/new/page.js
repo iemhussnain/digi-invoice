@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { CustomerSelect } from '@/components/ui/SearchableSelect';
 
 export default function NewInvoicePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [customers, setCustomers] = useState([]);
-  const [customersLoading, setCustomersLoading] = useState(true);
+  const [customerOption, setCustomerOption] = useState(null);
 
   const [formData, setFormData] = useState({
     customerId: '',
@@ -27,27 +27,6 @@ export default function NewInvoicePage() {
   const [items, setItems] = useState([
     { description: '', quantity: 1, unit: 'pcs', rate: 0, taxRate: 18, discountRate: 0 },
   ]);
-
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
-
-  const fetchCustomers = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/customers?isActive=true&limit=1000', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
-      if (data.success) {
-        setCustomers(data.data.customers);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setCustomersLoading(false);
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -182,21 +161,16 @@ export default function NewInvoicePage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Customer *</label>
-                <select
-                  name="customerId"
-                  value={formData.customerId}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">-- Select Customer --</option>
-                  {customers.map((customer) => (
-                    <option key={customer._id} value={customer._id}>
-                      {customer.customerCode} - {customer.name}
-                      {customer.companyName && ` (${customer.companyName})`}
-                    </option>
-                  ))}
-                </select>
+                <CustomerSelect
+                  value={customerOption}
+                  onChange={(selectedOption) => {
+                    setCustomerOption(selectedOption);
+                    setFormData((prev) => ({
+                      ...prev,
+                      customerId: selectedOption?.value || '',
+                    }));
+                  }}
+                />
               </div>
 
               <div>

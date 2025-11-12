@@ -1,62 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { showSuccess, showError } from '@/utils/toast';
+import { useCustomers, useDeleteCustomer } from '@/hooks/useCustomers';
 
 export default function CustomersPage() {
   const router = useRouter();
-  const [customers, setCustomers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState(null);
   const [filterActive, setFilterActive] = useState('all');
   const [filterType, setFilterType] = useState('all');
-  const [deleting, setDeleting] = useState(null);
 
-  useEffect(() => {
-    fetchCustomers();
-  }, [page, search, filterActive, filterType]);
+  // React Query hooks
+  const { data, isLoading, error } = useCustomers({
+    page,
+    search,
+    filterActive,
+    filterType
+  });
+  const deleteMutation = useDeleteCustomer();
 
-  const fetchCustomers = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '20',
-      });
-
-      if (search) params.append('search', search);
-      if (filterActive !== 'all') params.append('isActive', filterActive);
-      if (filterType !== 'all') params.append('customerType', filterType);
-
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/customers?${params.toString()}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setCustomers(data.data.customers);
-        setPagination(data.data.pagination);
-      } else {
-        setError(data.message);
-      }
-    } catch (err) {
-      setError('Failed to load customers');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const customers = data?.customers || [];
+  const pagination = data?.pagination || null;
 
   const handleDelete = async (customerId) => {
     if (!confirm('Are you sure you want to delete this customer?')) {
@@ -64,28 +31,10 @@ export default function CustomersPage() {
     }
 
     try {
-      setDeleting(customerId);
-
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/customers/${customerId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        fetchCustomers();
-      } else {
-        showError(data.message || 'Failed to delete customer');
-      }
+      await deleteMutation.mutateAsync(customerId);
+      showSuccess('Customer deleted successfully');
     } catch (err) {
-      showError('Failed to delete customer');
-      console.error(err);
-    } finally {
-      setDeleting(null);
+      showError(err.message || 'Failed to delete customer');
     }
   };
 
@@ -100,7 +49,6 @@ export default function CustomersPage() {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setPage(1);
-    fetchCustomers();
   };
 
   return (
@@ -194,7 +142,7 @@ export default function CustomersPage() {
         {/* Error Message */}
         {error && (
           <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-800 font-medium">{error}</p>
+            <p className="text-red-800 font-medium">{error.message}</p>
           </div>
         )}
 
@@ -211,7 +159,7 @@ export default function CustomersPage() {
             )}
           </div>
 
-          {loading ? (
+          {isLoading ? (
             <div className="p-12 text-center">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
               <p className="mt-4 text-gray-600">Loading customers...</p>
@@ -327,10 +275,10 @@ export default function CustomersPage() {
                             </Link>
                             <button
                               onClick={() => handleDelete(customer._id)}
-                              disabled={deleting === customer._id}
+                              disabled={deleteMutation.isPending}
                               className="text-red-600 hover:text-red-900 disabled:opacity-50"
                             >
-                              {deleting === customer._id ? 'Deleting...' : 'Delete'}
+                              {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
                             </button>
                           </div>
                         </td>

@@ -1,63 +1,35 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { showSuccess, showError } from '@/utils/toast';
+import { useSuppliers, useDeleteSupplier } from '@/hooks/useSuppliers';
 
 export default function SuppliersPage() {
   const router = useRouter();
-  const [suppliers, setSuppliers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [isActive, setIsActive] = useState('');
   const [category, setCategory] = useState('');
   const [paymentTerms, setPaymentTerms] = useState('');
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 50,
-    total: 0,
-    pages: 0,
+  const [page, setPage] = useState(1);
+
+  // React Query hooks
+  const { data, isLoading, error } = useSuppliers({
+    page,
+    search,
+    isActive,
+    category,
+    paymentTerms
   });
+  const deleteMutation = useDeleteSupplier();
 
-  useEffect(() => {
-    fetchSuppliers();
-  }, [pagination.page, search, isActive, category, paymentTerms]);
-
-  const fetchSuppliers = async () => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams({
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString(),
-        ...(search && { search }),
-        ...(isActive && { isActive }),
-        ...(category && { category }),
-        ...(paymentTerms && { paymentTerms }),
-      });
-
-      const response = await fetch(`/api/suppliers?${params}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setSuppliers(data.data.suppliers);
-        setPagination(data.data.pagination);
-      } else {
-        setError(data.message || 'Failed to fetch suppliers');
-      }
-    } catch (err) {
-      setError('Failed to fetch suppliers');
-      console.error('Error fetching suppliers:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const suppliers = data?.suppliers || [];
+  const pagination = data?.pagination || { page: 1, limit: 50, total: 0, pages: 0 };
 
   const handleSearch = (e) => {
     e.preventDefault();
-    setPagination({ ...pagination, page: 1 });
-    fetchSuppliers();
+    setPage(1);
   };
 
   const handleDelete = async (id) => {
@@ -66,20 +38,10 @@ export default function SuppliersPage() {
     }
 
     try {
-      const response = await fetch(`/api/suppliers/${id}`, {
-        method: 'DELETE',
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        fetchSuppliers();
-      } else {
-        showError(data.message || 'Failed to delete supplier');
-      }
+      await deleteMutation.mutateAsync(id);
+      showSuccess('Supplier deleted successfully');
     } catch (err) {
-      showError('Failed to delete supplier');
-      console.error('Error deleting supplier:', err);
+      showError(err.message || 'Failed to delete supplier');
     }
   };
 
@@ -92,7 +54,7 @@ export default function SuppliersPage() {
     }).format(amount);
   };
 
-  if (loading && suppliers.length === 0) {
+  if (isLoading && suppliers.length === 0) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -119,7 +81,7 @@ export default function SuppliersPage() {
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4">
-          {error}
+          {error.message}
         </div>
       )}
 
@@ -150,7 +112,7 @@ export default function SuppliersPage() {
                 value={isActive}
                 onChange={(e) => {
                   setIsActive(e.target.value);
-                  setPagination({ ...pagination, page: 1 });
+                  setPage(1);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
@@ -169,7 +131,7 @@ export default function SuppliersPage() {
                 value={category}
                 onChange={(e) => {
                   setCategory(e.target.value);
-                  setPagination({ ...pagination, page: 1 });
+                  setPage(1);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
@@ -191,7 +153,7 @@ export default function SuppliersPage() {
                 value={paymentTerms}
                 onChange={(e) => {
                   setPaymentTerms(e.target.value);
-                  setPagination({ ...pagination, page: 1 });
+                  setPage(1);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
@@ -217,7 +179,7 @@ export default function SuppliersPage() {
                 setIsActive('');
                 setCategory('');
                 setPaymentTerms('');
-                setPagination({ ...pagination, page: 1 });
+                setPage(1);
               }}
               className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition"
             >
@@ -368,19 +330,15 @@ export default function SuppliersPage() {
             </div>
             <div className="flex gap-2">
               <button
-                onClick={() =>
-                  setPagination({ ...pagination, page: pagination.page - 1 })
-                }
-                disabled={pagination.page === 1}
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Previous
               </button>
               <button
-                onClick={() =>
-                  setPagination({ ...pagination, page: pagination.page + 1 })
-                }
-                disabled={pagination.page >= pagination.pages}
+                onClick={() => setPage(page + 1)}
+                disabled={page >= pagination.pages}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next

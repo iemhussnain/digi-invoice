@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { SupplierSelect } from '@/components/ui/SearchableSelect';
 
 export default function NewPurchaseOrderPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [errors, setErrors] = useState({});
-  const [suppliers, setSuppliers] = useState([]);
+  const [supplierOption, setSupplierOption] = useState(null);
 
   const [formData, setFormData] = useState({
     poNumber: '',
@@ -42,22 +43,6 @@ export default function NewPurchaseOrderPage() {
       discountRate: 0,
     },
   ]);
-
-  useEffect(() => {
-    fetchSuppliers();
-  }, []);
-
-  const fetchSuppliers = async () => {
-    try {
-      const response = await fetch('/api/suppliers?limit=1000&isActive=true');
-      const data = await response.json();
-      if (data.success) {
-        setSuppliers(data.data.suppliers);
-      }
-    } catch (err) {
-      console.error('Error fetching suppliers:', err);
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -282,20 +267,20 @@ export default function NewPurchaseOrderPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Supplier <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    name="supplierId"
-                    value={formData.supplierId}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select Supplier</option>
-                    {suppliers.map((supplier) => (
-                      <option key={supplier._id} value={supplier._id}>
-                        {supplier.companyName} ({supplier.supplierCode})
-                      </option>
-                    ))}
-                  </select>
+                  <SupplierSelect
+                    value={supplierOption}
+                    onChange={(selectedOption) => {
+                      setSupplierOption(selectedOption);
+                      setFormData({
+                        ...formData,
+                        supplierId: selectedOption?.value || '',
+                      });
+                      if (errors.supplierId) {
+                        setErrors({ ...errors, supplierId: null });
+                      }
+                    }}
+                    error={!!errors.supplierId}
+                  />
                   {errors.supplierId && (
                     <p className="text-red-600 text-sm mt-1">{errors.supplierId}</p>
                   )}
