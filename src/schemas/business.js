@@ -1,71 +1,116 @@
 import { z } from 'zod';
 
 /**
- * Customer Schema
+ * Customer Schema - Comprehensive
  */
 export const customerSchema = z.object({
+  // Basic Information
   name: z
     .string()
     .min(1, 'Name is required')
     .min(2, 'Name must be at least 2 characters'),
+  companyName: z.string().optional(),
   email: z
     .string()
     .email('Invalid email address')
     .optional()
     .or(z.literal('')),
-  phone: z
-    .string()
-    .min(1, 'Phone is required')
-    .refine((val) => /^[\d\s\-\+\(\)]+$/.test(val), {
-      message: 'Invalid phone number format',
-    }),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  country: z.string().optional(),
-  companyName: z.string().optional(),
-  taxNumber: z.string().optional(),
+  phone: z.string().optional(),
+  mobile: z.string().optional(),
+  website: z.string().url('Invalid URL').optional().or(z.literal('')),
   customerType: z.enum(['individual', 'business'], {
     errorMap: () => ({ message: 'Customer type must be either individual or business' }),
   }),
-  creditLimit: z
-    .number()
-    .nonnegative('Credit limit must be positive')
-    .optional()
-    .or(z.literal(0)),
-  isActive: z.boolean().default(true),
+  category: z.string().optional(),
+
+  // Contact Person
+  contactPersonName: z.string().optional(),
+  contactPersonDesignation: z.string().optional(),
+  contactPersonPhone: z.string().optional(),
+  contactPersonEmail: z.string().email('Invalid email').optional().or(z.literal('')),
+
+  // Billing Address
+  billingStreet: z.string().optional(),
+  billingCity: z.string().optional(),
+  billingState: z.string().optional(),
+  billingPostalCode: z.string().optional(),
+  billingCountry: z.string().min(1, 'Country is required'),
+
+  // Shipping Address
+  shippingSameAsBilling: z.boolean().default(true),
+  shippingStreet: z.string().optional(),
+  shippingCity: z.string().optional(),
+  shippingState: z.string().optional(),
+  shippingPostalCode: z.string().optional(),
+  shippingCountry: z.string().optional(),
+
+  // Tax Information
+  ntn: z.string().optional(),
+  strn: z.string().optional(),
+  cnic: z.string().optional(),
+  gstRegistered: z.boolean().default(false),
+
+  // Financial Information
+  creditLimit: z.coerce.number().nonnegative('Credit limit must be positive').default(0),
+  creditDays: z.coerce.number().int().nonnegative('Credit days must be positive').default(0),
+  openingBalance: z.coerce.number().default(0),
+  paymentTerms: z.string().default('cash'),
+  paymentMethod: z.string().default('cash'),
+
+  // Other
   notes: z.string().optional(),
+  isActive: z.boolean().default(true),
 });
 
 /**
- * Supplier Schema
+ * Supplier Schema - Comprehensive
  */
 export const supplierSchema = z.object({
-  name: z
+  // Basic Information
+  supplierCode: z.string().optional(),
+  companyName: z
     .string()
-    .min(1, 'Name is required')
-    .min(2, 'Name must be at least 2 characters'),
+    .min(1, 'Company name is required')
+    .min(2, 'Company name must be at least 2 characters'),
+  contactPerson: z.string().optional(),
   email: z
     .string()
     .email('Invalid email address')
     .optional()
     .or(z.literal('')),
-  phone: z
-    .string()
-    .min(1, 'Phone is required')
-    .refine((val) => /^[\d\s\-\+\(\)]+$/.test(val), {
-      message: 'Invalid phone number format',
-    }),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  country: z.string().optional(),
-  companyName: z.string().optional(),
-  taxNumber: z.string().optional(),
-  supplierType: z.enum(['local', 'international'], {
-    errorMap: () => ({ message: 'Supplier type must be either local or international' }),
-  }),
-  paymentTerms: z.string().optional(),
+  phone: z.string().optional(),
+  mobile: z.string().optional(),
+  website: z.string().url('Invalid URL').optional().or(z.literal('')),
+
+  // Tax Information
+  ntn: z.string().optional(),
+  strn: z.string().optional(),
+  gstRegistered: z.boolean().default(false),
+
+  // Payment Terms
+  paymentTerms: z.string().default('credit'),
+  creditDays: z.coerce.number().int().nonnegative('Credit days must be positive').default(30),
+  creditLimit: z.coerce.number().nonnegative('Credit limit must be positive').default(0),
+  openingBalance: z.coerce.number().default(0),
+  balanceType: z.enum(['debit', 'credit']).default('credit'),
+
+  // Category and Status
+  category: z.string().default('other'),
   isActive: z.boolean().default(true),
   notes: z.string().optional(),
+
+  // Address
+  street: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  postalCode: z.string().optional(),
+  country: z.string().default('Pakistan'),
+
+  // Bank Details
+  bankName: z.string().optional(),
+  accountTitle: z.string().optional(),
+  accountNumber: z.string().optional(),
+  iban: z.string().optional(),
 });
 
 /**
