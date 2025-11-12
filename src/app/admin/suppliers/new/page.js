@@ -1,63 +1,57 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { supplierSchema } from '@/schemas/business';
 import { useCreateSupplier } from '@/hooks/useSuppliers';
 
 export default function NewSupplierPage() {
   const router = useRouter();
-  const [errors, setErrors] = useState({});
   const createSupplier = useCreateSupplier();
 
-  const [formData, setFormData] = useState({
-    supplierCode: '',
-    companyName: '',
-    contactPerson: '',
-    email: '',
-    phone: '',
-    mobile: '',
-    website: '',
-    ntn: '',
-    strn: '',
-    gstRegistered: false,
-    paymentTerms: 'credit',
-    creditDays: 30,
-    creditLimit: 0,
-    openingBalance: 0,
-    balanceType: 'credit',
-    category: 'other',
-    isActive: true,
-    notes: '',
-    // Address
-    street: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    country: 'Pakistan',
-    // Bank details
-    bankName: '',
-    accountTitle: '',
-    accountNumber: '',
-    iban: '',
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(supplierSchema),
+    defaultValues: {
+      supplierCode: '',
+      companyName: '',
+      contactPerson: '',
+      email: '',
+      phone: '',
+      mobile: '',
+      website: '',
+      ntn: '',
+      strn: '',
+      gstRegistered: false,
+      paymentTerms: 'credit',
+      creditDays: 30,
+      creditLimit: 0,
+      openingBalance: 0,
+      balanceType: 'credit',
+      category: 'other',
+      isActive: true,
+      notes: '',
+      street: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      country: 'Pakistan',
+      bankName: '',
+      accountTitle: '',
+      accountNumber: '',
+      iban: '',
+    },
   });
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value,
-    });
-    // Clear field error when user starts typing
-    if (errors[name]) {
-      setErrors({ ...errors, [name]: null });
-    }
-  };
+  const notes = watch('notes') || '';
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErrors({});
-
+  const onSubmit = (formData) => {
     // Build address object
     const address = {
       street: formData.street,
@@ -98,12 +92,6 @@ export default function NewSupplierPage() {
       onSuccess: () => {
         router.push('/admin/suppliers');
       },
-      onError: (error) => {
-        // Handle validation errors from API
-        if (error.response?.data?.errors) {
-          setErrors(error.response.data.errors);
-        }
-      },
     });
   };
 
@@ -129,7 +117,7 @@ export default function NewSupplierPage() {
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Basic Information */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
@@ -142,14 +130,12 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="text"
-                name="supplierCode"
-                value={formData.supplierCode}
-                onChange={handleChange}
+                {...register('supplierCode')}
                 placeholder="Auto-generated if empty"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               {errors.supplierCode && (
-                <p className="text-red-600 text-sm mt-1">{errors.supplierCode}</p>
+                <p className="text-red-600 text-sm mt-1">{errors.supplierCode.message}</p>
               )}
             </div>
 
@@ -159,14 +145,13 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="text"
-                name="companyName"
-                value={formData.companyName}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                {...register('companyName')}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errors.companyName ? 'border-red-300' : 'border-gray-300'
+                }`}
               />
               {errors.companyName && (
-                <p className="text-red-600 text-sm mt-1">{errors.companyName}</p>
+                <p className="text-red-600 text-sm mt-1">{errors.companyName.message}</p>
               )}
             </div>
 
@@ -176,9 +161,7 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="text"
-                name="contactPerson"
-                value={formData.contactPerson}
-                onChange={handleChange}
+                {...register('contactPerson')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -188,9 +171,7 @@ export default function NewSupplierPage() {
                 Category
               </label>
               <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
+                {...register('category')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="raw_material">Raw Material</option>
@@ -215,13 +196,13 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                {...register('email')}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errors.email ? 'border-red-300' : 'border-gray-300'
+                }`}
               />
               {errors.email && (
-                <p className="text-red-600 text-sm mt-1">{errors.email}</p>
+                <p className="text-red-600 text-sm mt-1">{errors.email.message}</p>
               )}
             </div>
 
@@ -231,9 +212,7 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="text"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
+                {...register('phone')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -244,9 +223,7 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="text"
-                name="mobile"
-                value={formData.mobile}
-                onChange={handleChange}
+                {...register('mobile')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -257,11 +234,14 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="url"
-                name="website"
-                value={formData.website}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                {...register('website')}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errors.website ? 'border-red-300' : 'border-gray-300'
+                }`}
               />
+              {errors.website && (
+                <p className="text-red-600 text-sm mt-1">{errors.website.message}</p>
+              )}
             </div>
           </div>
         </div>
@@ -278,14 +258,12 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="text"
-                name="ntn"
-                value={formData.ntn}
-                onChange={handleChange}
+                {...register('ntn')}
                 placeholder="e.g., 1234567 or 1234567-8"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               {errors.ntn && (
-                <p className="text-red-600 text-sm mt-1">{errors.ntn}</p>
+                <p className="text-red-600 text-sm mt-1">{errors.ntn.message}</p>
               )}
             </div>
 
@@ -295,9 +273,7 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="text"
-                name="strn"
-                value={formData.strn}
-                onChange={handleChange}
+                {...register('strn')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -306,9 +282,7 @@ export default function NewSupplierPage() {
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  name="gstRegistered"
-                  checked={formData.gstRegistered}
-                  onChange={handleChange}
+                  {...register('gstRegistered')}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <span className="ml-2 text-sm text-gray-700">
@@ -330,9 +304,7 @@ export default function NewSupplierPage() {
                 Payment Terms
               </label>
               <select
-                name="paymentTerms"
-                value={formData.paymentTerms}
-                onChange={handleChange}
+                {...register('paymentTerms')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="cash">Cash</option>
@@ -347,12 +319,15 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="number"
-                name="creditDays"
-                value={formData.creditDays}
-                onChange={handleChange}
+                {...register('creditDays')}
                 min="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errors.creditDays ? 'border-red-300' : 'border-gray-300'
+                }`}
               />
+              {errors.creditDays && (
+                <p className="text-red-600 text-sm mt-1">{errors.creditDays.message}</p>
+              )}
             </div>
 
             <div>
@@ -361,13 +336,16 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="number"
-                name="creditLimit"
-                value={formData.creditLimit}
-                onChange={handleChange}
+                {...register('creditLimit')}
                 min="0"
                 step="0.01"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errors.creditLimit ? 'border-red-300' : 'border-gray-300'
+                }`}
               />
+              {errors.creditLimit && (
+                <p className="text-red-600 text-sm mt-1">{errors.creditLimit.message}</p>
+              )}
             </div>
           </div>
         </div>
@@ -384,9 +362,7 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="number"
-                name="openingBalance"
-                value={formData.openingBalance}
-                onChange={handleChange}
+                {...register('openingBalance')}
                 step="0.01"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -397,9 +373,7 @@ export default function NewSupplierPage() {
                 Balance Type
               </label>
               <select
-                name="balanceType"
-                value={formData.balanceType}
-                onChange={handleChange}
+                {...register('balanceType')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="credit">Credit (We owe supplier)</option>
@@ -419,9 +393,7 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="text"
-                name="street"
-                value={formData.street}
-                onChange={handleChange}
+                {...register('street')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -432,9 +404,7 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="text"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
+                {...register('city')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -445,9 +415,7 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="text"
-                name="state"
-                value={formData.state}
-                onChange={handleChange}
+                {...register('state')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -458,9 +426,7 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="text"
-                name="postalCode"
-                value={formData.postalCode}
-                onChange={handleChange}
+                {...register('postalCode')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -471,9 +437,7 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="text"
-                name="country"
-                value={formData.country}
-                onChange={handleChange}
+                {...register('country')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -492,9 +456,7 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="text"
-                name="bankName"
-                value={formData.bankName}
-                onChange={handleChange}
+                {...register('bankName')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -505,9 +467,7 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="text"
-                name="accountTitle"
-                value={formData.accountTitle}
-                onChange={handleChange}
+                {...register('accountTitle')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -518,9 +478,7 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="text"
-                name="accountNumber"
-                value={formData.accountNumber}
-                onChange={handleChange}
+                {...register('accountNumber')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -531,9 +489,7 @@ export default function NewSupplierPage() {
               </label>
               <input
                 type="text"
-                name="iban"
-                value={formData.iban}
-                onChange={handleChange}
+                {...register('iban')}
                 placeholder="e.g., PK36HABB0123456789012345"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -552,15 +508,13 @@ export default function NewSupplierPage() {
                 Notes
               </label>
               <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
+                {...register('notes')}
                 rows="4"
                 maxLength="1000"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <p className="text-sm text-gray-500 mt-1">
-                {formData.notes.length}/1000 characters
+                {notes.length}/1000 characters
               </p>
             </div>
 
@@ -568,9 +522,7 @@ export default function NewSupplierPage() {
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  name="isActive"
-                  checked={formData.isActive}
-                  onChange={handleChange}
+                  {...register('isActive')}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <span className="ml-2 text-sm text-gray-700">Active</span>
