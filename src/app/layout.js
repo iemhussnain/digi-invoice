@@ -1,5 +1,6 @@
 import "./globals.css";
 import QueryProvider from "@/providers/QueryProvider";
+import ToastProvider from "@/providers/ToastProvider";
 
 export default function RootLayout({ children }) {
   return (
@@ -9,6 +10,7 @@ export default function RootLayout({ children }) {
         <meta name="description" content="Modern ERP solution for digital invoicing" />
       </head>
       <body className="antialiased">
+        <ToastProvider />
         <QueryProvider>
           {children}
         </QueryProvider>

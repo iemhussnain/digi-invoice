@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { showSuccess, showError } from '@/utils/toast';
 
 export default function RoleDetailPage({ params }) {
   const router = useRouter();
@@ -99,7 +100,7 @@ export default function RoleDetailPage({ params }) {
         throw new Error(data.message || 'Failed to update permissions');
       }
 
-      alert('Permissions updated successfully!');
+      showSuccess('Permissions updated successfully!');
     } catch (err) {
       console.error('Save error:', err);
       setError(err.message);

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { exportSalesReport } from '@/utils/excelExport';
+import { showSuccess, showError, showPromise } from '@/utils/toast';
 
 export default function InvoicesPage() {
   const router = useRouter();
@@ -69,23 +70,29 @@ export default function InvoicesPage() {
       setPosting(invoiceId);
 
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/invoices/${invoiceId}/post`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
 
-      const data = await response.json();
-
-      if (data.success) {
-        fetchInvoices();
-        alert('Invoice posted successfully!');
-      } else {
-        alert(data.message || 'Failed to post invoice');
-      }
+      await showPromise(
+        fetch(`/api/invoices/${invoiceId}/post`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }).then(async (response) => {
+          const data = await response.json();
+          if (data.success) {
+            fetchInvoices();
+            return data;
+          } else {
+            throw new Error(data.message || 'Failed to post invoice');
+          }
+        }),
+        {
+          loading: 'Posting invoice...',
+          success: 'Invoice posted successfully!',
+          error: (err) => err.message || 'Failed to post invoice',
+        }
+      );
     } catch (err) {
-      alert('Failed to post invoice');
       console.error(err);
     } finally {
       setPosting(null);
@@ -101,22 +108,29 @@ export default function InvoicesPage() {
       setDeleting(invoiceId);
 
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/invoices/${invoiceId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
 
-      const data = await response.json();
-
-      if (data.success) {
-        fetchInvoices();
-      } else {
-        alert(data.message || 'Failed to delete invoice');
-      }
+      await showPromise(
+        fetch(`/api/invoices/${invoiceId}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }).then(async (response) => {
+          const data = await response.json();
+          if (data.success) {
+            fetchInvoices();
+            return data;
+          } else {
+            throw new Error(data.message || 'Failed to delete invoice');
+          }
+        }),
+        {
+          loading: 'Deleting invoice...',
+          success: 'Invoice deleted successfully!',
+          error: (err) => err.message || 'Failed to delete invoice',
+        }
+      );
     } catch (err) {
-      alert('Failed to delete invoice');
       console.error(err);
     } finally {
       setDeleting(null);

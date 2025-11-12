@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { showSuccess, showError } from '@/utils/toast';
 
 export default function CustomersPage() {
   const router = useRouter();
@@ -78,10 +79,10 @@ export default function CustomersPage() {
       if (data.success) {
         fetchCustomers();
       } else {
-        alert(data.message || 'Failed to delete customer');
+        showError(data.message || 'Failed to delete customer');
       }
     } catch (err) {
-      alert('Failed to delete customer');
+      showError('Failed to delete customer');
       console.error(err);
     } finally {
       setDeleting(null);

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { showSuccess, showError } from '@/utils/toast';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -150,7 +151,7 @@ export default function ForgotPasswordPage() {
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(devInfo.resetUrl);
-                  alert('Link copied to clipboard!');
+                  showSuccess('Link copied to clipboard!');
                 }}
                 className="text-xs text-yellow-800 underline hover:text-yellow-900"
               >

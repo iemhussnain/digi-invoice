@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { showSuccess, showError } from '@/utils/toast';
 
 export default function NewPurchaseInvoicePage() {
   const router = useRouter();
@@ -187,7 +188,7 @@ export default function NewPurchaseInvoicePage() {
         throw new Error(data.error || 'Failed to create purchase invoice');
       }
 
-      alert('Purchase invoice created successfully');
+      showSuccess('Purchase invoice created successfully');
       router.push(`/admin/purchase-invoices/${data.data.purchaseInvoice._id}`);
     } catch (err) {
       setError(err.message);

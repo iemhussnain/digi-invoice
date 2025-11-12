@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { exportChartOfAccounts } from '@/utils/excelExport';
+import { showSuccess, showError } from '@/utils/toast';
 
 export default function AccountsPage() {
   const router = useRouter();
@@ -86,14 +87,14 @@ export default function AccountsPage() {
       const data = await response.json();
 
       if (data.success) {
-        alert(`Successfully created ${data.data.accountsCreated} accounts!`);
+        showSuccess(`Successfully created ${data.data.accountsCreated} accounts!`);
         fetchAccounts();
       } else {
-        alert(data.message || 'Failed to seed Chart of Accounts');
+        showError(data.message || 'Failed to seed Chart of Accounts');
       }
     } catch (err) {
       console.error('Error seeding COA:', err);
-      alert('Failed to seed Chart of Accounts');
+      showError('Failed to seed Chart of Accounts');
     } finally {
       setSeeding(false);
     }

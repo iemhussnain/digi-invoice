@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { showSuccess, showError } from '@/utils/toast';
 
 function PurchaseInvoicesList() {
   const router = useRouter();
@@ -101,10 +102,10 @@ function PurchaseInvoicesList() {
         throw new Error(data.error || 'Failed to delete invoice');
       }
 
-      alert('Purchase invoice deleted successfully');
+      showSuccess('Purchase invoice deleted successfully');
       fetchPurchaseInvoices(pagination.page);
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     }
   };
 

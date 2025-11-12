@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { showSuccess, showError } from '@/utils/toast';
 
 export default function ViewPurchaseInvoicePage({ params }) {
   const router = useRouter();
@@ -58,19 +59,16 @@ export default function ViewPurchaseInvoicePage({ params }) {
 
       const result = data.data.matchingResult;
       if (result.isMatched) {
-        alert('✓ Invoice verified successfully - all items matched!');
+        showSuccess('Invoice verified successfully - all items matched!');
       } else {
-        alert(
-          `⚠ Invoice verified with mismatches:\n` +
-            `- Matching Status: ${result.matchingStatus}\n` +
-            `- Quantity Variance: ${result.quantityVariance}\n` +
-            `Please review before approval.`
+        showError(
+          `Invoice verified with mismatches: Matching Status: ${result.matchingStatus}, Quantity Variance: ${result.quantityVariance}. Please review before approval.`
         );
       }
 
       fetchInvoice();
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     } finally {
       setActionLoading(false);
     }
@@ -96,10 +94,10 @@ export default function ViewPurchaseInvoicePage({ params }) {
         throw new Error(data.error || 'Failed to approve invoice');
       }
 
-      alert('Purchase invoice approved successfully');
+      showSuccess('Purchase invoice approved successfully');
       fetchInvoice();
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     } finally {
       setActionLoading(false);
     }
@@ -129,12 +127,12 @@ export default function ViewPurchaseInvoicePage({ params }) {
         throw new Error(data.error || 'Failed to post invoice');
       }
 
-      alert(
-        `Invoice posted successfully!\n\nVoucher: ${data.data.voucher.voucherNumber}\nAmount: Rs. ${data.data.voucher.totalDebit.toLocaleString()}`
+      showSuccess(
+        `Invoice posted successfully! Voucher: ${data.data.voucher.voucherNumber}, Amount: Rs. ${data.data.voucher.totalDebit.toLocaleString()}`
       );
       fetchInvoice();
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     } finally {
       setActionLoading(false);
     }

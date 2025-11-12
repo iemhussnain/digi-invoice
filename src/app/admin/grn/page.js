@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { showSuccess, showError } from '@/utils/toast';
 
 export default function GRNPage() {
   const router = useRouter();
@@ -100,10 +101,10 @@ export default function GRNPage() {
       if (data.success) {
         fetchGRNs();
       } else {
-        alert(data.message || 'Failed to delete GRN');
+        showError(data.message || 'Failed to delete GRN');
       }
     } catch (err) {
-      alert('Failed to delete GRN');
+      showError('Failed to delete GRN');
       console.error('Error deleting GRN:', err);
     }
   };

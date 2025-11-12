@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { showSuccess, showError } from '@/utils/toast';
 
 export default function SuppliersPage() {
   const router = useRouter();
@@ -74,10 +75,10 @@ export default function SuppliersPage() {
       if (data.success) {
         fetchSuppliers();
       } else {
-        alert(data.message || 'Failed to delete supplier');
+        showError(data.message || 'Failed to delete supplier');
       }
     } catch (err) {
-      alert('Failed to delete supplier');
+      showError('Failed to delete supplier');
       console.error('Error deleting supplier:', err);
     }
   };

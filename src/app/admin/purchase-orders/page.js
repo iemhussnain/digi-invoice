@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { exportPurchaseReport } from '@/utils/excelExport';
+import { showSuccess, showError } from '@/utils/toast';
 
 export default function PurchaseOrdersPage() {
   const router = useRouter();
@@ -95,10 +96,10 @@ export default function PurchaseOrdersPage() {
       if (data.success) {
         fetchPurchaseOrders();
       } else {
-        alert(data.message || 'Failed to delete purchase order');
+        showError(data.message || 'Failed to delete purchase order');
       }
     } catch (err) {
-      alert('Failed to delete purchase order');
+      showError('Failed to delete purchase order');
       console.error('Error deleting purchase order:', err);
     }
   };
@@ -115,7 +116,7 @@ export default function PurchaseOrdersPage() {
     if (!sendModal.po) return;
 
     if (!sendModal.email) {
-      alert('Please enter an email address');
+      showError('Please enter an email address');
       return;
     }
 
@@ -132,14 +133,14 @@ export default function PurchaseOrdersPage() {
       const data = await response.json();
 
       if (data.success) {
-        alert(`Purchase order sent successfully to ${sendModal.email}`);
+        showSuccess(`Purchase order sent successfully to ${sendModal.email}`);
         setSendModal({ open: false, po: null, email: '' });
         fetchPurchaseOrders();
       } else {
-        alert(data.message || 'Failed to send purchase order');
+        showError(data.message || 'Failed to send purchase order');
       }
     } catch (err) {
-      alert('Failed to send purchase order');
+      showError('Failed to send purchase order');
       console.error('Error sending purchase order:', err);
     } finally {
       setSending(false);

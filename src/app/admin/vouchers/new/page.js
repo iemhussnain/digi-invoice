@@ -4,6 +4,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { showSuccess, showError } from '@/utils/toast';
 
 export default function NewVoucherPage() {
   const router = useRouter();
@@ -116,7 +117,7 @@ export default function NewVoucherPage() {
 
   const removeEntry = (index) => {
     if (entries.length <= 2) {
-      alert('Voucher must have at least 2 entries');
+      showError('Voucher must have at least 2 entries');
       return;
     }
     const newEntries = entries.filter((_, i) => i !== index);

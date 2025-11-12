@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { showSuccess, showError } from '@/utils/toast';
 
 export default function RolesManagementPage() {
   const [roles, setRoles] = useState([]);
@@ -70,11 +71,11 @@ export default function RolesManagementPage() {
         setSelectedRole(null);
         await fetchRoles();
       } else {
-        alert(data.message || 'Failed to delete role');
+        showError(data.message || 'Failed to delete role');
       }
     } catch (err) {
       console.error('Delete role error:', err);
-      alert('Network error. Please try again.');
+      showError('Network error. Please try again.');
     }
   };
 
