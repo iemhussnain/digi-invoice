@@ -1,61 +1,27 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { showSuccess, showError } from '@/utils/toast';
+import { useGRNs } from '@/hooks/useGRN';
 
 export default function GRNPage() {
   const router = useRouter();
-  const [grns, setGrns] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [inspectionStatus, setInspectionStatus] = useState('');
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 50,
-    total: 0,
-    pages: 0,
-  });
+  const [page, setPage] = useState(1);
 
   // Create from PO modal
   const [poModal, setPoModal] = useState(false);
   const [purchaseOrders, setPurchaseOrders] = useState([]);
 
-  useEffect(() => {
-    fetchGRNs();
-  }, [pagination.page, search, status, inspectionStatus]);
+  const { data, isLoading, isError, error } = useGRNs({ page, search, status, inspectionStatus });
 
-  const fetchGRNs = async () => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams({
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString(),
-        ...(search && { search }),
-        ...(status && { status }),
-        ...(inspectionStatus && { inspectionStatus }),
-      });
-
-      const response = await fetch(`/api/grn?${params}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setGrns(data.data.grns);
-        setPagination(data.data.pagination);
-      } else {
-        setError(data.message || 'Failed to fetch GRNs');
-      }
-    } catch (err) {
-      setError('Failed to fetch GRNs');
-      console.error('Error fetching GRNs:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const grns = data?.grns || [];
+  const pagination = data?.pagination || { page: 1, limit: 50, total: 0, pages: 0 };
 
   const fetchPurchaseOrders = async () => {
     try {
@@ -159,7 +125,7 @@ export default function GRNPage() {
     );
   };
 
-  if (loading && grns.length === 0) {
+  if (isLoading && grns.length === 0) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -184,15 +150,15 @@ export default function GRNPage() {
       </div>
 
       {/* Error Message */}
-      {error && (
+      {isError && (
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4">
-          {error}
+          {error?.message}
         </div>
       )}
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-        <form onSubmit={(e) => { e.preventDefault(); fetchGRNs(); }} className="space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); }} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -215,7 +181,7 @@ export default function GRNPage() {
                 value={status}
                 onChange={(e) => {
                   setStatus(e.target.value);
-                  setPagination({ ...pagination, page: 1 });
+                  setPage(1);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
@@ -235,7 +201,7 @@ export default function GRNPage() {
                 value={inspectionStatus}
                 onChange={(e) => {
                   setInspectionStatus(e.target.value);
-                  setPagination({ ...pagination, page: 1 });
+                  setPage(1);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
@@ -384,7 +350,7 @@ export default function GRNPage() {
             <div className="flex gap-2">
               <button
                 onClick={() =>
-                  setPagination({ ...pagination, page: pagination.page - 1 })
+                  setPage(pagination.page - 1)
                 }
                 disabled={pagination.page === 1}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -393,7 +359,7 @@ export default function GRNPage() {
               </button>
               <button
                 onClick={() =>
-                  setPagination({ ...pagination, page: pagination.page + 1 })
+                  setPage(pagination.page + 1)
                 }
                 disabled={pagination.page >= pagination.pages}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"

@@ -1,69 +1,21 @@
 'use client';
 
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useVouchers } from '@/hooks/useVouchers';
 
 export default function VouchersPage() {
   const router = useRouter();
-  const [vouchers, setVouchers] = useState([]);
-  const [summary, setSummary] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    fetchVouchers();
-  }, [filterType, filterStatus]);
+  const { data, isLoading, isError, error } = useVouchers({ voucherType: filterType, status: filterStatus });
 
-  const fetchVouchers = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/login');
-        return;
-      }
-
-      const params = new URLSearchParams();
-      if (filterType !== 'all') {
-        params.append('voucherType', filterType);
-      }
-      if (filterStatus !== 'all') {
-        params.append('status', filterStatus);
-      }
-
-      const response = await fetch(`/api/vouchers?${params.toString()}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.status === 401) {
-        router.push('/login');
-        return;
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        setVouchers(data.data.vouchers);
-        setSummary(data.data.summary);
-      } else {
-        setError(data.message || 'Failed to load vouchers');
-      }
-    } catch (err) {
-      console.error('Error fetching vouchers:', err);
-      setError('Failed to load vouchers. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const vouchers = data?.vouchers || [];
+  const summary = data?.summary || null;
 
   const filteredVouchers = vouchers.filter((voucher) => {
     if (searchTerm) {
@@ -114,7 +66,7 @@ export default function VouchersPage() {
     return labels[type] || type;
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -156,9 +108,9 @@ export default function VouchersPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {error && (
+        {isError && (
           <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
-            {error}
+            {error?.message}
           </div>
         )}
 
