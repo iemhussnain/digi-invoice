@@ -2,45 +2,39 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { loginSchema } from '@/schemas/auth';
 
 export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [forceLoginRequired, setForceLoginRequired] = useState(false);
   const [deviceInfo, setDeviceInfo] = useState(null);
 
-  // Form state
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    forceLogin: false,
+  // React Hook Form
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      forceLogin: false,
+    },
   });
 
-  // Handle input change
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    // Clear error for this field
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: '',
-      }));
-    }
-  };
-
   // Handle form submit
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (formData) => {
     setLoading(true);
-    setErrors({});
+    setApiError('');
     setSuccessMessage('');
     setForceLoginRequired(false);
 
@@ -74,20 +68,14 @@ export default function LoginPage() {
         // Active session on another device
         setForceLoginRequired(true);
         setDeviceInfo(data.errors);
-        setErrors({
-          general: data.errors?.message || 'You are logged in on another device',
-        });
+        setApiError(data.errors?.message || 'You are logged in on another device');
       } else {
         // Other errors
-        if (data.errors) {
-          setErrors(data.errors);
-        } else {
-          setErrors({ general: data.message || 'Login failed' });
-        }
+        setApiError(data.message || 'Login failed');
       }
     } catch (error) {
       console.error('Login error:', error);
-      setErrors({ general: 'Network error. Please try again.' });
+      setApiError('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -95,9 +83,8 @@ export default function LoginPage() {
 
   // Handle force login
   const handleForceLogin = async () => {
-    setFormData((prev) => ({ ...prev, forceLogin: true }));
-    // Re-submit form with forceLogin flag
-    await handleSubmit({ preventDefault: () => {} });
+    setValue('forceLogin', true);
+    await handleSubmit(onSubmit)();
   };
 
   return (
@@ -121,15 +108,10 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* General Error */}
-        {errors.general && !forceLoginRequired && (
+        {/* API Error */}
+        {apiError && !forceLoginRequired && (
           <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg">
-            {errors.general}
-            {errors.attemptsRemaining !== undefined && (
-              <p className="text-sm mt-1">
-                Attempts remaining: {errors.attemptsRemaining}
-              </p>
-            )}
+            {apiError}
           </div>
         )}
 
@@ -162,20 +144,17 @@ export default function LoginPage() {
         )}
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 shadow-2xl rounded-2xl p-8 space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="bg-white dark:bg-gray-800 shadow-2xl rounded-2xl p-8 space-y-6">
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Email Address
               </label>
               <input
+                {...register('email')}
                 id="email"
-                name="email"
                 type="email"
-                required
                 autoComplete="email"
-                value={formData.email}
-                onChange={handleChange}
                 className={cn(
                   'mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm',
                   'focus:outline-none focus:ring-2 focus:ring-blue-500',
@@ -184,7 +163,7 @@ export default function LoginPage() {
                 )}
                 placeholder="you@example.com"
               />
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
             </div>
 
             <div>
@@ -192,13 +171,10 @@ export default function LoginPage() {
                 Password
               </label>
               <input
+                {...register('password')}
                 id="password"
-                name="password"
                 type="password"
-                required
                 autoComplete="current-password"
-                value={formData.password}
-                onChange={handleChange}
                 className={cn(
                   'mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm',
                   'focus:outline-none focus:ring-2 focus:ring-blue-500',
@@ -207,7 +183,7 @@ export default function LoginPage() {
                 )}
                 placeholder="Enter your password"
               />
-              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
             </div>
           </div>
 
