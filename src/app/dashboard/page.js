@@ -4,12 +4,16 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import RevenueExpenseChart from '@/components/charts/RevenueExpenseChart';
 import SalesAnalyticsChart from '@/components/charts/SalesAnalyticsChart';
 import MonthlyComparisonChart from '@/components/charts/MonthlyComparisonChart';
 import TopCustomersChart from '@/components/charts/TopCustomersChart';
 import TopSuppliersChart from '@/components/charts/TopSuppliersChart';
 import { DashboardSkeleton } from '@/components/ui/LoadingSkeleton';
+import AnimatedCard from '@/components/motion/AnimatedCard';
+import AnimatedButton from '@/components/motion/AnimatedButton';
+import { fadeInUp, listContainerVariants, listItemVariants } from '@/utils/animations';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -101,30 +105,40 @@ export default function DashboardPage() {
               </p>
             )}
           </div>
-          <button
+          <AnimatedButton
             onClick={handleLogout}
             className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition"
           >
             Logout
-          </button>
+          </AnimatedButton>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Card */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <motion.div
+          initial="initial"
+          animate="animate"
+          variants={fadeInUp}
+          className="bg-white rounded-lg shadow-lg p-6 mb-6"
+        >
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Welcome, {user?.name}! 🎉
           </h2>
           <p className="text-gray-600">
             You have successfully logged in to your dashboard.
           </p>
-        </div>
+        </motion.div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white rounded-lg shadow p-6">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={listContainerVariants}
+          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6"
+        >
+          <motion.div variants={listItemVariants} className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="rounded-md bg-blue-500 p-3">
@@ -140,9 +154,9 @@ export default function DashboardPage() {
                 </dl>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <motion.div variants={listItemVariants} className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="rounded-md bg-green-500 p-3">
@@ -158,9 +172,9 @@ export default function DashboardPage() {
                 </dl>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <motion.div variants={listItemVariants} className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="rounded-md bg-purple-500 p-3">
@@ -176,9 +190,9 @@ export default function DashboardPage() {
                 </dl>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <motion.div variants={listItemVariants} className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="rounded-md bg-orange-500 p-3">
@@ -194,8 +208,8 @@ export default function DashboardPage() {
                 </dl>
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Analytics Charts */}
         <div className="mb-6">

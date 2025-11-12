@@ -19,6 +19,7 @@
     "date-fns": "^4.1.0",
     "flowbite": "^3.1.2",
     "flowbite-react": "^0.12.10",
+    "framer-motion": "^12.23.24",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.3",
     "next": "16.0.1",
