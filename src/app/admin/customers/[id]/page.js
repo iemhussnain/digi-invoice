@@ -3,14 +3,15 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useCustomer, useUpdateCustomer } from '@/hooks/useCustomers';
 
 export default function EditCustomerPage({ params }) {
   const router = useRouter();
   const { id } = params;
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState(null);
   const [errors, setErrors] = useState({});
+
+  const { data: customerData, isLoading, isError, error } = useCustomer(id);
+  const updateCustomer = useUpdateCustomer();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -62,78 +63,54 @@ export default function EditCustomerPage({ params }) {
     isActive: true,
   });
 
+  // Populate form when customer data loads
   useEffect(() => {
-    fetchCustomer();
-  }, [id]);
+    if (customerData?.customer) {
+      const customer = customerData.customer;
+      setFormData({
+        name: customer.name || '',
+        companyName: customer.companyName || '',
+        email: customer.email || '',
+        phone: customer.phone || '',
+        mobile: customer.mobile || '',
+        website: customer.website || '',
+        customerType: customer.customerType || 'individual',
+        category: customer.category || '',
 
-  const fetchCustomer = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+        contactPersonName: customer.contactPerson?.name || '',
+        contactPersonDesignation: customer.contactPerson?.designation || '',
+        contactPersonPhone: customer.contactPerson?.phone || '',
+        contactPersonEmail: customer.contactPerson?.email || '',
 
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/customers/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        billingStreet: customer.billingAddress?.street || '',
+        billingCity: customer.billingAddress?.city || '',
+        billingState: customer.billingAddress?.state || '',
+        billingPostalCode: customer.billingAddress?.postalCode || '',
+        billingCountry: customer.billingAddress?.country || 'Pakistan',
+
+        shippingSameAsBilling: customer.shippingAddress?.sameAsBilling ?? true,
+        shippingStreet: customer.shippingAddress?.street || '',
+        shippingCity: customer.shippingAddress?.city || '',
+        shippingState: customer.shippingAddress?.state || '',
+        shippingPostalCode: customer.shippingAddress?.postalCode || '',
+        shippingCountry: customer.shippingAddress?.country || 'Pakistan',
+
+        ntn: customer.ntn || '',
+        strn: customer.strn || '',
+        cnic: customer.cnic || '',
+        gstRegistered: customer.gstRegistered || false,
+
+        creditLimit: customer.creditLimit || 0,
+        creditDays: customer.creditDays || 0,
+        openingBalance: customer.openingBalance || 0,
+        paymentTerms: customer.paymentTerms || 'cash',
+        paymentMethod: customer.paymentMethod || 'cash',
+
+        notes: customer.notes || '',
+        isActive: customer.isActive ?? true,
       });
-
-      const data = await response.json();
-
-      if (data.success) {
-        const customer = data.data.customer;
-        setFormData({
-          name: customer.name || '',
-          companyName: customer.companyName || '',
-          email: customer.email || '',
-          phone: customer.phone || '',
-          mobile: customer.mobile || '',
-          website: customer.website || '',
-          customerType: customer.customerType || 'individual',
-          category: customer.category || '',
-
-          contactPersonName: customer.contactPerson?.name || '',
-          contactPersonDesignation: customer.contactPerson?.designation || '',
-          contactPersonPhone: customer.contactPerson?.phone || '',
-          contactPersonEmail: customer.contactPerson?.email || '',
-
-          billingStreet: customer.billingAddress?.street || '',
-          billingCity: customer.billingAddress?.city || '',
-          billingState: customer.billingAddress?.state || '',
-          billingPostalCode: customer.billingAddress?.postalCode || '',
-          billingCountry: customer.billingAddress?.country || 'Pakistan',
-
-          shippingSameAsBilling: customer.shippingAddress?.sameAsBilling ?? true,
-          shippingStreet: customer.shippingAddress?.street || '',
-          shippingCity: customer.shippingAddress?.city || '',
-          shippingState: customer.shippingAddress?.state || '',
-          shippingPostalCode: customer.shippingAddress?.postalCode || '',
-          shippingCountry: customer.shippingAddress?.country || 'Pakistan',
-
-          ntn: customer.ntn || '',
-          strn: customer.strn || '',
-          cnic: customer.cnic || '',
-          gstRegistered: customer.gstRegistered || false,
-
-          creditLimit: customer.creditLimit || 0,
-          creditDays: customer.creditDays || 0,
-          openingBalance: customer.openingBalance || 0,
-          paymentTerms: customer.paymentTerms || 'cash',
-          paymentMethod: customer.paymentMethod || 'cash',
-
-          notes: customer.notes || '',
-          isActive: customer.isActive ?? true,
-        });
-      } else {
-        setError(data.message);
-      }
-    } catch (err) {
-      setError('Failed to load customer');
-      console.error(err);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [customerData]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -145,90 +122,74 @@ export default function EditCustomerPage({ params }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitting(true);
-    setError(null);
     setErrors({});
 
-    try {
-      const token = localStorage.getItem('token');
+    // Prepare data
+    const customerDataToUpdate = {
+      name: formData.name,
+      companyName: formData.companyName || undefined,
+      email: formData.email || undefined,
+      phone: formData.phone || undefined,
+      mobile: formData.mobile || undefined,
+      website: formData.website || undefined,
+      customerType: formData.customerType,
+      category: formData.category || undefined,
 
-      // Prepare data
-      const customerData = {
-        name: formData.name,
-        companyName: formData.companyName || undefined,
-        email: formData.email || undefined,
-        phone: formData.phone || undefined,
-        mobile: formData.mobile || undefined,
-        website: formData.website || undefined,
-        customerType: formData.customerType,
-        category: formData.category || undefined,
+      contactPerson: {
+        name: formData.contactPersonName || undefined,
+        designation: formData.contactPersonDesignation || undefined,
+        phone: formData.contactPersonPhone || undefined,
+        email: formData.contactPersonEmail || undefined,
+      },
 
-        contactPerson: {
-          name: formData.contactPersonName || undefined,
-          designation: formData.contactPersonDesignation || undefined,
-          phone: formData.contactPersonPhone || undefined,
-          email: formData.contactPersonEmail || undefined,
+      billingAddress: {
+        street: formData.billingStreet || undefined,
+        city: formData.billingCity || undefined,
+        state: formData.billingState || undefined,
+        postalCode: formData.billingPostalCode || undefined,
+        country: formData.billingCountry,
+      },
+
+      shippingAddress: {
+        sameAsBilling: formData.shippingSameAsBilling,
+        street: formData.shippingSameAsBilling ? undefined : formData.shippingStreet,
+        city: formData.shippingSameAsBilling ? undefined : formData.shippingCity,
+        state: formData.shippingSameAsBilling ? undefined : formData.shippingState,
+        postalCode: formData.shippingSameAsBilling ? undefined : formData.shippingPostalCode,
+        country: formData.shippingSameAsBilling ? undefined : formData.shippingCountry,
+      },
+
+      ntn: formData.ntn || undefined,
+      strn: formData.strn || undefined,
+      cnic: formData.cnic || undefined,
+      gstRegistered: formData.gstRegistered,
+
+      creditLimit: parseFloat(formData.creditLimit) || 0,
+      creditDays: parseInt(formData.creditDays) || 0,
+      paymentTerms: formData.paymentTerms,
+      paymentMethod: formData.paymentMethod,
+
+      notes: formData.notes || undefined,
+      isActive: formData.isActive,
+    };
+
+    updateCustomer.mutate(
+      { customerId: id, customerData: customerDataToUpdate },
+      {
+        onSuccess: () => {
+          router.push('/admin/customers');
         },
-
-        billingAddress: {
-          street: formData.billingStreet || undefined,
-          city: formData.billingCity || undefined,
-          state: formData.billingState || undefined,
-          postalCode: formData.billingPostalCode || undefined,
-          country: formData.billingCountry,
+        onError: (error) => {
+          // Handle validation errors from API
+          if (error.response?.error?.errors) {
+            setErrors(error.response.error.errors);
+          }
         },
-
-        shippingAddress: {
-          sameAsBilling: formData.shippingSameAsBilling,
-          street: formData.shippingSameAsBilling ? undefined : formData.shippingStreet,
-          city: formData.shippingSameAsBilling ? undefined : formData.shippingCity,
-          state: formData.shippingSameAsBilling ? undefined : formData.shippingState,
-          postalCode: formData.shippingSameAsBilling ? undefined : formData.shippingPostalCode,
-          country: formData.shippingSameAsBilling ? undefined : formData.shippingCountry,
-        },
-
-        ntn: formData.ntn || undefined,
-        strn: formData.strn || undefined,
-        cnic: formData.cnic || undefined,
-        gstRegistered: formData.gstRegistered,
-
-        creditLimit: parseFloat(formData.creditLimit) || 0,
-        creditDays: parseInt(formData.creditDays) || 0,
-        paymentTerms: formData.paymentTerms,
-        paymentMethod: formData.paymentMethod,
-
-        notes: formData.notes || undefined,
-        isActive: formData.isActive,
-      };
-
-      const response = await fetch(`/api/customers/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(customerData),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        router.push('/admin/customers');
-      } else {
-        if (data.error?.errors) {
-          setErrors(data.error.errors);
-        }
-        setError(data.message || 'Failed to update customer');
       }
-    } catch (err) {
-      setError('Failed to update customer. Please try again.');
-      console.error(err);
-    } finally {
-      setSubmitting(false);
-    }
+    );
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 p-8">
         <div className="max-w-4xl mx-auto">
@@ -236,6 +197,26 @@ export default function EditCustomerPage({ params }) {
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             <p className="ml-4 text-gray-600">Loading customer...</p>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
+            <p className="text-red-800 font-medium">
+              {error?.message || 'Failed to load customer'}
+            </p>
+          </div>
+          <Link
+            href="/admin/customers"
+            className="inline-block mt-4 px-4 py-2 text-gray-600 hover:text-gray-900 font-medium"
+          >
+            ← Back to Customers
+          </Link>
         </div>
       </div>
     );
@@ -261,9 +242,11 @@ export default function EditCustomerPage({ params }) {
         </div>
 
         {/* Error Message */}
-        {error && (
+        {updateCustomer.isError && (
           <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-800 font-medium">{error}</p>
+            <p className="text-red-800 font-medium">
+              {updateCustomer.error?.message || 'Failed to update customer'}
+            </p>
           </div>
         )}
 
@@ -611,10 +594,10 @@ export default function EditCustomerPage({ params }) {
             </Link>
             <button
               type="submit"
-              disabled={submitting}
+              disabled={updateCustomer.isPending}
               className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
-              {submitting ? 'Updating...' : 'Update Customer'}
+              {updateCustomer.isPending ? 'Updating...' : 'Update Customer'}
             </button>
           </div>
         </form>

@@ -38,6 +38,100 @@ export function useInvoices({ page = 1, search = '', filterStatus = 'all', filte
 }
 
 /**
+ * Fetch single invoice by ID
+ */
+export function useInvoice(invoiceId) {
+  return useQuery({
+    queryKey: ['invoices', invoiceId],
+    queryFn: async () => {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/invoices/${invoiceId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to load invoice');
+      }
+
+      return data.data;
+    },
+    enabled: !!invoiceId,
+  });
+}
+
+/**
+ * Create invoice mutation
+ */
+export function useCreateInvoice() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (invoiceData) => {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/invoices', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(invoiceData),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to create invoice');
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      // Invalidate all invoice queries to refetch
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+    },
+  });
+}
+
+/**
+ * Update invoice mutation
+ */
+export function useUpdateInvoice() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ invoiceId, invoiceData }) => {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/invoices/${invoiceId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(invoiceData),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to update invoice');
+      }
+
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate all invoice queries to refetch
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      // Invalidate the specific invoice query
+      queryClient.invalidateQueries({ queryKey: ['invoices', variables.invoiceId] });
+    },
+  });
+}
+
+/**
  * Post invoice mutation
  */
 export function usePostInvoice() {

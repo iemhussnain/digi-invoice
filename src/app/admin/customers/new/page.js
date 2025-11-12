@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useCreateCustomer } from '@/hooks/useCustomers';
 
 export default function NewCustomerPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [errors, setErrors] = useState({});
+  const createCustomer = useCreateCustomer();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -70,88 +70,69 @@ export default function NewCustomerPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
     setErrors({});
 
-    try {
-      const token = localStorage.getItem('token');
+    // Prepare data
+    const customerData = {
+      name: formData.name,
+      companyName: formData.companyName || undefined,
+      email: formData.email || undefined,
+      phone: formData.phone || undefined,
+      mobile: formData.mobile || undefined,
+      website: formData.website || undefined,
+      customerType: formData.customerType,
+      category: formData.category || undefined,
 
-      // Prepare data
-      const customerData = {
-        name: formData.name,
-        companyName: formData.companyName || undefined,
-        email: formData.email || undefined,
-        phone: formData.phone || undefined,
-        mobile: formData.mobile || undefined,
-        website: formData.website || undefined,
-        customerType: formData.customerType,
-        category: formData.category || undefined,
+      contactPerson: {
+        name: formData.contactPersonName || undefined,
+        designation: formData.contactPersonDesignation || undefined,
+        phone: formData.contactPersonPhone || undefined,
+        email: formData.contactPersonEmail || undefined,
+      },
 
-        contactPerson: {
-          name: formData.contactPersonName || undefined,
-          designation: formData.contactPersonDesignation || undefined,
-          phone: formData.contactPersonPhone || undefined,
-          email: formData.contactPersonEmail || undefined,
-        },
+      billingAddress: {
+        street: formData.billingStreet || undefined,
+        city: formData.billingCity || undefined,
+        state: formData.billingState || undefined,
+        postalCode: formData.billingPostalCode || undefined,
+        country: formData.billingCountry,
+      },
 
-        billingAddress: {
-          street: formData.billingStreet || undefined,
-          city: formData.billingCity || undefined,
-          state: formData.billingState || undefined,
-          postalCode: formData.billingPostalCode || undefined,
-          country: formData.billingCountry,
-        },
+      shippingAddress: {
+        sameAsBilling: formData.shippingSameAsBilling,
+        street: formData.shippingSameAsBilling ? undefined : formData.shippingStreet,
+        city: formData.shippingSameAsBilling ? undefined : formData.shippingCity,
+        state: formData.shippingSameAsBilling ? undefined : formData.shippingState,
+        postalCode: formData.shippingSameAsBilling ? undefined : formData.shippingPostalCode,
+        country: formData.shippingSameAsBilling ? undefined : formData.shippingCountry,
+      },
 
-        shippingAddress: {
-          sameAsBilling: formData.shippingSameAsBilling,
-          street: formData.shippingSameAsBilling ? undefined : formData.shippingStreet,
-          city: formData.shippingSameAsBilling ? undefined : formData.shippingCity,
-          state: formData.shippingSameAsBilling ? undefined : formData.shippingState,
-          postalCode: formData.shippingSameAsBilling ? undefined : formData.shippingPostalCode,
-          country: formData.shippingSameAsBilling ? undefined : formData.shippingCountry,
-        },
+      ntn: formData.ntn || undefined,
+      strn: formData.strn || undefined,
+      cnic: formData.cnic || undefined,
+      gstRegistered: formData.gstRegistered,
 
-        ntn: formData.ntn || undefined,
-        strn: formData.strn || undefined,
-        cnic: formData.cnic || undefined,
-        gstRegistered: formData.gstRegistered,
+      creditLimit: parseFloat(formData.creditLimit) || 0,
+      creditDays: parseInt(formData.creditDays) || 0,
+      openingBalance: parseFloat(formData.openingBalance) || 0,
+      paymentTerms: formData.paymentTerms,
+      paymentMethod: formData.paymentMethod,
 
-        creditLimit: parseFloat(formData.creditLimit) || 0,
-        creditDays: parseInt(formData.creditDays) || 0,
-        openingBalance: parseFloat(formData.openingBalance) || 0,
-        paymentTerms: formData.paymentTerms,
-        paymentMethod: formData.paymentMethod,
+      notes: formData.notes || undefined,
+      isActive: formData.isActive,
+    };
 
-        notes: formData.notes || undefined,
-        isActive: formData.isActive,
-      };
-
-      const response = await fetch('/api/customers', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(customerData),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
+    createCustomer.mutate(customerData, {
+      onSuccess: () => {
         router.push('/admin/customers');
-      } else {
-        if (data.error?.errors) {
-          setErrors(data.error.errors);
+      },
+      onError: (error) => {
+        // Handle validation errors from API
+        if (error.response?.error?.errors) {
+          setErrors(error.response.error.errors);
         }
-        setError(data.message || 'Failed to create customer');
-      }
-    } catch (err) {
-      setError('Failed to create customer. Please try again.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+      },
+    });
   };
 
   return (
@@ -174,9 +155,11 @@ export default function NewCustomerPage() {
         </div>
 
         {/* Error Message */}
-        {error && (
+        {createCustomer.isError && (
           <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-800 font-medium">{error}</p>
+            <p className="text-red-800 font-medium">
+              {createCustomer.error?.message || 'Failed to create customer'}
+            </p>
           </div>
         )}
 
@@ -680,10 +663,10 @@ export default function NewCustomerPage() {
             </Link>
             <button
               type="submit"
-              disabled={loading}
+              disabled={createCustomer.isPending}
               className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? 'Creating...' : 'Create Customer'}
+              {createCustomer.isPending ? 'Creating...' : 'Create Customer'}
             </button>
           </div>
         </form>

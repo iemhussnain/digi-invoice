@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useCreateSupplier } from '@/hooks/useSuppliers';
 
 export default function NewSupplierPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [errors, setErrors] = useState({});
+  const createSupplier = useCreateSupplier();
 
   const [formData, setFormData] = useState({
     supplierCode: '',
@@ -56,71 +56,55 @@ export default function NewSupplierPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
     setErrors({});
 
-    try {
-      // Build address object
-      const address = {
-        street: formData.street,
-        city: formData.city,
-        state: formData.state,
-        postalCode: formData.postalCode,
-        country: formData.country,
-      };
+    // Build address object
+    const address = {
+      street: formData.street,
+      city: formData.city,
+      state: formData.state,
+      postalCode: formData.postalCode,
+      country: formData.country,
+    };
 
-      // Build supplier data
-      const supplierData = {
-        supplierCode: formData.supplierCode || undefined,
-        companyName: formData.companyName,
-        contactPerson: formData.contactPerson,
-        email: formData.email,
-        phone: formData.phone,
-        mobile: formData.mobile,
-        website: formData.website,
-        ntn: formData.ntn,
-        strn: formData.strn,
-        gstRegistered: formData.gstRegistered,
-        paymentTerms: formData.paymentTerms,
-        creditDays: parseInt(formData.creditDays) || 0,
-        creditLimit: parseFloat(formData.creditLimit) || 0,
-        openingBalance: parseFloat(formData.openingBalance) || 0,
-        balanceType: formData.balanceType,
-        category: formData.category,
-        isActive: formData.isActive,
-        notes: formData.notes,
-        address,
-        bankName: formData.bankName,
-        accountTitle: formData.accountTitle,
-        accountNumber: formData.accountNumber,
-        iban: formData.iban,
-      };
+    // Build supplier data
+    const supplierData = {
+      supplierCode: formData.supplierCode || undefined,
+      companyName: formData.companyName,
+      contactPerson: formData.contactPerson,
+      email: formData.email,
+      phone: formData.phone,
+      mobile: formData.mobile,
+      website: formData.website,
+      ntn: formData.ntn,
+      strn: formData.strn,
+      gstRegistered: formData.gstRegistered,
+      paymentTerms: formData.paymentTerms,
+      creditDays: parseInt(formData.creditDays) || 0,
+      creditLimit: parseFloat(formData.creditLimit) || 0,
+      openingBalance: parseFloat(formData.openingBalance) || 0,
+      balanceType: formData.balanceType,
+      category: formData.category,
+      isActive: formData.isActive,
+      notes: formData.notes,
+      address,
+      bankName: formData.bankName,
+      accountTitle: formData.accountTitle,
+      accountNumber: formData.accountNumber,
+      iban: formData.iban,
+    };
 
-      const response = await fetch('/api/suppliers', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(supplierData),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
+    createSupplier.mutate(supplierData, {
+      onSuccess: () => {
         router.push('/admin/suppliers');
-      } else {
-        if (data.data?.errors) {
-          setErrors(data.data.errors);
+      },
+      onError: (error) => {
+        // Handle validation errors from API
+        if (error.response?.data?.errors) {
+          setErrors(error.response.data.errors);
         }
-        setError(data.message || 'Failed to create supplier');
-      }
-    } catch (err) {
-      setError('Failed to create supplier');
-      console.error('Error creating supplier:', err);
-    } finally {
-      setLoading(false);
-    }
+      },
+    });
   };
 
   return (
@@ -138,9 +122,9 @@ export default function NewSupplierPage() {
       </div>
 
       {/* Error Message */}
-      {error && (
+      {createSupplier.isError && (
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
-          {error}
+          {createSupplier.error?.message || 'Failed to create supplier'}
         </div>
       )}
 
@@ -599,10 +583,10 @@ export default function NewSupplierPage() {
         <div className="flex gap-4">
           <button
             type="submit"
-            disabled={loading}
+            disabled={createSupplier.isPending}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Creating...' : 'Create Supplier'}
+            {createSupplier.isPending ? 'Creating...' : 'Create Supplier'}
           </button>
           <Link
             href="/admin/suppliers"
