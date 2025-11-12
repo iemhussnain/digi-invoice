@@ -1,103 +1,38 @@
 'use client';
 
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { exportChartOfAccounts } from '@/utils/excelExport';
 import { showSuccess, showError } from '@/utils/toast';
+import { useAccounts, useSeedAccounts } from '@/hooks/useAccounts';
 
 export default function AccountsPage() {
   const router = useRouter();
-  const [accounts, setAccounts] = useState([]);
-  const [summary, setSummary] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showInactive, setShowInactive] = useState(false);
-  const [seeding, setSeeding] = useState(false);
 
-  useEffect(() => {
-    fetchAccounts();
-  }, [filterType, showInactive]);
+  const { data, isLoading, isError, error } = useAccounts({ type: filterType, includeInactive: showInactive });
+  const seedAccounts = useSeedAccounts();
 
-  const fetchAccounts = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const accounts = data?.accounts || [];
+  const summary = data?.summary || null;
 
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/login');
-        return;
-      }
-
-      const params = new URLSearchParams();
-      if (filterType !== 'all') {
-        params.append('type', filterType);
-      }
-      if (showInactive) {
-        params.append('includeInactive', 'true');
-      }
-
-      const response = await fetch(`/api/accounts?${params.toString()}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.status === 401) {
-        router.push('/login');
-        return;
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        setAccounts(data.data.accounts);
-        setSummary(data.data.summary);
-      } else {
-        setError(data.message || 'Failed to load accounts');
-      }
-    } catch (err) {
-      console.error('Error fetching accounts:', err);
-      setError('Failed to load accounts. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSeedCOA = async () => {
+  const handleSeedCOA = () => {
     if (!confirm('This will create default Chart of Accounts. Continue?')) {
       return;
     }
 
-    try {
-      setSeeding(true);
-      const token = localStorage.getItem('token');
-
-      const response = await fetch('/api/accounts/seed', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
+    seedAccounts.mutate(undefined, {
+      onSuccess: (data) => {
         showSuccess(`Successfully created ${data.data.accountsCreated} accounts!`);
-        fetchAccounts();
-      } else {
-        showError(data.message || 'Failed to seed Chart of Accounts');
-      }
-    } catch (err) {
-      console.error('Error seeding COA:', err);
-      showError('Failed to seed Chart of Accounts');
-    } finally {
-      setSeeding(false);
-    }
+      },
+      onError: (error) => {
+        showError(error.message || 'Failed to seed Chart of Accounts');
+      },
+    });
   };
 
   const filteredAccounts = accounts.filter((account) => {
@@ -145,7 +80,7 @@ export default function AccountsPage() {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -189,10 +124,10 @@ export default function AccountsPage() {
               {accounts.length === 0 ? (
                 <button
                   onClick={handleSeedCOA}
-                  disabled={seeding}
+                  disabled={seedAccounts.isPending}
                   className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
                 >
-                  {seeding ? 'Seeding...' : '🌱 Seed Default COA'}
+                  {seedAccounts.isPending ? 'Seeding...' : '🌱 Seed Default COA'}
                 </button>
               ) : (
                 <Link
@@ -208,9 +143,9 @@ export default function AccountsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {error && (
+        {isError && (
           <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
-            {error}
+            {error?.message}
           </div>
         )}
 
@@ -225,10 +160,10 @@ export default function AccountsPage() {
             </p>
             <button
               onClick={handleSeedCOA}
-              disabled={seeding}
+              disabled={seedAccounts.isPending}
               className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition disabled:opacity-50"
             >
-              {seeding ? 'Seeding...' : '🌱 Seed Default COA (50+ accounts)'}
+              {seedAccounts.isPending ? 'Seeding...' : '🌱 Seed Default COA (50+ accounts)'}
             </button>
           </div>
         ) : (
