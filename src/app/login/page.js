@@ -7,14 +7,17 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { loginSchema } from '@/schemas/auth';
+import { useLogin } from '@/hooks/useAuth';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [forceLoginRequired, setForceLoginRequired] = useState(false);
   const [deviceInfo, setDeviceInfo] = useState(null);
+
+  // React Query mutation
+  const loginMutation = useLogin();
 
   // React Hook Form
   const {
@@ -33,51 +36,30 @@ export default function LoginPage() {
 
   // Handle form submit
   const onSubmit = async (formData) => {
-    setLoading(true);
     setApiError('');
     setSuccessMessage('');
     setForceLoginRequired(false);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const data = await loginMutation.mutateAsync(formData);
 
-      const data = await response.json();
+      // Success
+      setSuccessMessage(data.message);
 
-      if (response.ok) {
-        // Success
-        setSuccessMessage(data.message);
-
-        // Store token in localStorage
-        if (data.data?.token) {
-          localStorage.setItem('token', data.data.token);
-          localStorage.setItem('user', JSON.stringify(data.data.user));
-          localStorage.setItem('organization', JSON.stringify(data.data.organization));
-        }
-
-        // Redirect to dashboard after 1 second
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 1000);
-      } else if (response.status === 409) {
-        // Active session on another device
+      // Redirect to dashboard after 1 second
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1000);
+    } catch (error) {
+      // Handle 409 status (active session on another device)
+      if (error.status === 409) {
         setForceLoginRequired(true);
-        setDeviceInfo(data.errors);
-        setApiError(data.errors?.message || 'You are logged in on another device');
+        setDeviceInfo(error.deviceInfo);
+        setApiError(error.message);
       } else {
         // Other errors
-        setApiError(data.message || 'Login failed');
+        setApiError(error.message || 'Login failed');
       }
-    } catch (error) {
-      console.error('Login error:', error);
-      setApiError('Network error. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -135,10 +117,10 @@ export default function LoginPage() {
             </p>
             <button
               onClick={handleForceLogin}
-              disabled={loading}
+              disabled={loginMutation.isPending}
               className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 px-4 rounded-lg"
             >
-              {loading ? 'Logging in...' : 'Yes, Logout & Login Here'}
+              {loginMutation.isPending ? 'Logging in...' : 'Yes, Logout & Login Here'}
             </button>
           </div>
         )}
@@ -212,15 +194,15 @@ export default function LoginPage() {
           <div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loginMutation.isPending}
               className={cn(
                 'w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white',
-                loading
+                loginMutation.isPending
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
               )}
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loginMutation.isPending ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
 
