@@ -4,6 +4,11 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import RevenueExpenseChart from '@/components/charts/RevenueExpenseChart';
+import SalesAnalyticsChart from '@/components/charts/SalesAnalyticsChart';
+import MonthlyComparisonChart from '@/components/charts/MonthlyComparisonChart';
+import TopCustomersChart from '@/components/charts/TopCustomersChart';
+import TopSuppliersChart from '@/components/charts/TopSuppliersChart';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -187,6 +192,28 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Analytics Charts */}
+        <div className="mb-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Analytics Dashboard</h2>
+
+          {/* Revenue & Expense + Sales Analytics */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <RevenueExpenseChart />
+            <SalesAnalyticsChart />
+          </div>
+
+          {/* Monthly Comparison */}
+          <div className="mb-6">
+            <MonthlyComparisonChart height={350} />
+          </div>
+
+          {/* Top Customers & Suppliers */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <TopCustomersChart height={350} />
+            <TopSuppliersChart height={350} />
+          </div>
+        </div>
+
         {/* User Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="bg-white rounded-lg shadow p-6">
@@ -325,11 +352,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Coming Soon Notice */}
-        <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg">
-          <p className="font-medium">🚀 More features coming soon!</p>
+        {/* Info Notice */}
+        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+          <p className="font-medium">📊 Analytics Dashboard Active!</p>
           <p className="text-sm mt-1">
-            This is a basic dashboard. Full ERP features are under development.
+            View real-time charts and analytics for revenue, expenses, sales, and top customers/suppliers.
           </p>
         </div>
       </main>
