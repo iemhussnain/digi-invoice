@@ -20,6 +20,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState(null);
   const [organization, setOrganization] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     // Check if we're in the browser (client-side only)
@@ -93,17 +94,27 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              DigInvoice ERP
-            </h1>
-            {organization && (
-              <p className="text-sm text-gray-600">
-                {organization.name}
-              </p>
-            )}
+      <header className="bg-white shadow sticky top-0 z-50">
+        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <div className="flex items-center">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="lg:hidden mr-3 p-2 rounded-lg hover:bg-gray-100 transition"
+            >
+              <svg className="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                DigInvoice ERP
+              </h1>
+              {organization && (
+                <p className="text-sm text-gray-600">
+                  {organization.name}
+                </p>
+              )}
+            </div>
           </div>
           <AnimatedButton
             onClick={handleLogout}
@@ -114,8 +125,120 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex">
+        {/* Sidebar */}
+        <aside
+          className={`
+            fixed lg:sticky top-[73px] left-0 h-[calc(100vh-73px)] bg-white shadow-lg z-40
+            transform transition-transform duration-300 ease-in-out
+            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            w-64 overflow-y-auto
+          `}
+        >
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-900">⚡ Quick Actions</h3>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="lg:hidden p-1 rounded hover:bg-gray-100"
+              >
+                <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <nav className="space-y-2">
+              <Link
+                href="/admin/sales"
+                className="flex items-center p-3 rounded-lg bg-gradient-to-r from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 border-2 border-emerald-300 text-emerald-700 font-semibold transition-all duration-200 hover:scale-105"
+              >
+                <span className="text-2xl mr-3">💵</span>
+                <span className="text-sm">Quick Sale</span>
+              </Link>
+              <Link
+                href="/admin/customers"
+                className="flex items-center p-3 rounded-lg bg-gradient-to-r from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 text-orange-700 font-semibold transition-all duration-200 hover:scale-105"
+              >
+                <span className="text-2xl mr-3">👥</span>
+                <span className="text-sm">Customers</span>
+              </Link>
+              <Link
+                href="/admin/suppliers"
+                className="flex items-center p-3 rounded-lg bg-gradient-to-r from-amber-50 to-amber-100 hover:from-amber-100 hover:to-amber-200 text-amber-700 font-semibold transition-all duration-200 hover:scale-105"
+              >
+                <span className="text-2xl mr-3">🏭</span>
+                <span className="text-sm">Suppliers</span>
+              </Link>
+              <Link
+                href="/admin/purchase-orders"
+                className="flex items-center p-3 rounded-lg bg-gradient-to-r from-cyan-50 to-cyan-100 hover:from-cyan-100 hover:to-cyan-200 text-cyan-700 font-semibold transition-all duration-200 hover:scale-105"
+              >
+                <span className="text-2xl mr-3">📦</span>
+                <span className="text-sm">Purchase Orders</span>
+              </Link>
+              <Link
+                href="/admin/grn"
+                className="flex items-center p-3 rounded-lg bg-gradient-to-r from-lime-50 to-lime-100 hover:from-lime-100 hover:to-lime-200 text-lime-700 font-semibold transition-all duration-200 hover:scale-105"
+              >
+                <span className="text-2xl mr-3">✅</span>
+                <span className="text-sm">Goods Receipt</span>
+              </Link>
+              <Link
+                href="/admin/purchase-invoices"
+                className="flex items-center p-3 rounded-lg bg-gradient-to-r from-rose-50 to-rose-100 hover:from-rose-100 hover:to-rose-200 text-rose-700 font-semibold transition-all duration-200 hover:scale-105"
+              >
+                <span className="text-2xl mr-3">📄</span>
+                <span className="text-sm">Purchase Invoices</span>
+              </Link>
+              <Link
+                href="/admin/invoices"
+                className="flex items-center p-3 rounded-lg bg-gradient-to-r from-teal-50 to-teal-100 hover:from-teal-100 hover:to-teal-200 text-teal-700 font-semibold transition-all duration-200 hover:scale-105"
+              >
+                <span className="text-2xl mr-3">🧾</span>
+                <span className="text-sm">Sales Invoices</span>
+              </Link>
+              <Link
+                href="/admin/vouchers"
+                className="flex items-center p-3 rounded-lg bg-gradient-to-r from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 text-green-700 font-semibold transition-all duration-200 hover:scale-105"
+              >
+                <span className="text-2xl mr-3">📝</span>
+                <span className="text-sm">Vouchers</span>
+              </Link>
+              <Link
+                href="/admin/reports"
+                className="flex items-center p-3 rounded-lg bg-gradient-to-r from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 text-purple-700 font-semibold transition-all duration-200 hover:scale-105"
+              >
+                <span className="text-2xl mr-3">📈</span>
+                <span className="text-sm">Reports</span>
+              </Link>
+              <Link
+                href="/admin/accounts"
+                className="flex items-center p-3 rounded-lg bg-gradient-to-r from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 text-indigo-700 font-semibold transition-all duration-200 hover:scale-105"
+              >
+                <span className="text-2xl mr-3">📊</span>
+                <span className="text-sm">Accounts</span>
+              </Link>
+              <Link
+                href="/admin/roles"
+                className="flex items-center p-3 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 text-blue-700 font-semibold transition-all duration-200 hover:scale-105"
+              >
+                <span className="text-2xl mr-3">🔐</span>
+                <span className="text-sm">Roles</span>
+              </Link>
+            </nav>
+          </div>
+        </aside>
+
+        {/* Overlay for mobile */}
+        {sidebarOpen && (
+          <div
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          />
+        )}
+
+        {/* Main Content */}
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 lg:ml-0">
         {/* Welcome Card - Compact */}
         <motion.div
           initial="initial"
@@ -193,102 +316,6 @@ export default function DashboardPage() {
               </div>
             </div>
           </motion.div>
-        </motion.div>
-
-        {/* Quick Actions - Moved Up */}
-        <motion.div
-          initial="initial"
-          animate="animate"
-          variants={fadeInUp}
-          className="bg-white rounded-lg shadow-md p-6 mb-6"
-        >
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="text-lg font-bold text-gray-900">
-              ⚡ Quick Actions
-            </h3>
-            <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-              11 Modules
-            </span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            <Link
-              href="/admin/sales"
-              className="group bg-gradient-to-br from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 border-2 border-emerald-300 text-emerald-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
-            >
-              <div className="text-2xl mb-2">💵</div>
-              <div className="text-sm">Quick Sale</div>
-            </Link>
-            <Link
-              href="/admin/customers"
-              className="group bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 text-orange-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
-            >
-              <div className="text-2xl mb-2">👥</div>
-              <div className="text-sm">Customers</div>
-            </Link>
-            <Link
-              href="/admin/suppliers"
-              className="group bg-gradient-to-br from-amber-50 to-amber-100 hover:from-amber-100 hover:to-amber-200 text-amber-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
-            >
-              <div className="text-2xl mb-2">🏭</div>
-              <div className="text-sm">Suppliers</div>
-            </Link>
-            <Link
-              href="/admin/purchase-orders"
-              className="group bg-gradient-to-br from-cyan-50 to-cyan-100 hover:from-cyan-100 hover:to-cyan-200 text-cyan-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
-            >
-              <div className="text-2xl mb-2">📦</div>
-              <div className="text-sm">Purchase Orders</div>
-            </Link>
-            <Link
-              href="/admin/grn"
-              className="group bg-gradient-to-br from-lime-50 to-lime-100 hover:from-lime-100 hover:to-lime-200 text-lime-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
-            >
-              <div className="text-2xl mb-2">✅</div>
-              <div className="text-sm">Goods Receipt</div>
-            </Link>
-            <Link
-              href="/admin/purchase-invoices"
-              className="group bg-gradient-to-br from-rose-50 to-rose-100 hover:from-rose-100 hover:to-rose-200 text-rose-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
-            >
-              <div className="text-2xl mb-2">📄</div>
-              <div className="text-sm">Purchase Invoices</div>
-            </Link>
-            <Link
-              href="/admin/invoices"
-              className="group bg-gradient-to-br from-teal-50 to-teal-100 hover:from-teal-100 hover:to-teal-200 text-teal-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
-            >
-              <div className="text-2xl mb-2">🧾</div>
-              <div className="text-sm">Sales Invoices</div>
-            </Link>
-            <Link
-              href="/admin/vouchers"
-              className="group bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 text-green-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
-            >
-              <div className="text-2xl mb-2">📝</div>
-              <div className="text-sm">Vouchers</div>
-            </Link>
-            <Link
-              href="/admin/reports"
-              className="group bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 text-purple-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
-            >
-              <div className="text-2xl mb-2">📈</div>
-              <div className="text-sm">Reports</div>
-            </Link>
-            <Link
-              href="/admin/accounts"
-              className="group bg-gradient-to-br from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 text-indigo-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
-            >
-              <div className="text-2xl mb-2">📊</div>
-              <div className="text-sm">Accounts</div>
-            </Link>
-            <Link
-              href="/admin/roles"
-              className="group bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 text-blue-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
-            >
-              <div className="text-2xl mb-2">🔐</div>
-              <div className="text-sm">Roles</div>
-            </Link>
-          </div>
         </motion.div>
 
         {/* Analytics Charts */}
@@ -384,7 +411,8 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
