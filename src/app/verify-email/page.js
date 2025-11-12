@@ -3,20 +3,24 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useVerifyEmail, useResendVerification } from '@/hooks/useAuth';
 
 function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
-  const [verifying, setVerifying] = useState(true);
-  const [verified, setVerified] = useState(false);
-  const [alreadyVerified, setAlreadyVerified] = useState(false);
   const [error, setError] = useState('');
-  const [userInfo, setUserInfo] = useState(null);
-  const [resending, setResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [resendEmail, setResendEmail] = useState('');
+
+  // React Query hooks
+  const { data: verifyData, isLoading: verifying, error: verifyError } = useVerifyEmail(token);
+  const resendMutation = useResendVerification();
+
+  const verified = !!verifyData;
+  const alreadyVerified = verifyData?.alreadyVerified || false;
+  const userInfo = verifyData?.user;
 
   // Auto-redirect to login after successful verification
   useEffect(() => {
@@ -29,46 +33,14 @@ function VerifyEmailContent() {
     }
   }, [verified, alreadyVerified, router]);
 
-  // Verify email on page load
+  // Set error from verification
   useEffect(() => {
     if (!token) {
       setError('Invalid verification link. No token provided.');
-      setVerifying(false);
-      return;
+    } else if (verifyError) {
+      setError(verifyError.message || 'Failed to verify email');
     }
-
-    verifyEmail();
-  }, [token]);
-
-  const verifyEmail = async () => {
-    try {
-      setVerifying(true);
-      setError('');
-
-      const response = await fetch(`/api/auth/verify-email?token=${token}`, {
-        method: 'GET',
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setVerified(true);
-        setUserInfo(data.data.user);
-
-        // Check if already verified
-        if (data.data.alreadyVerified) {
-          setAlreadyVerified(true);
-        }
-      } else {
-        setError(data.message || 'Failed to verify email');
-      }
-    } catch (err) {
-      console.error('Email verification error:', err);
-      setError('Network error. Please check your connection and try again.');
-    } finally {
-      setVerifying(false);
-    }
-  };
+  }, [token, verifyError]);
 
   const handleResendVerification = async (e) => {
     e.preventDefault();
@@ -79,31 +51,15 @@ function VerifyEmailContent() {
     }
 
     try {
-      setResending(true);
       setError('');
       setResendSuccess(false);
 
-      const response = await fetch('/api/auth/resend-verification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: resendEmail }),
-      });
+      await resendMutation.mutateAsync(resendEmail);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setResendSuccess(true);
-        setResendEmail('');
-      } else {
-        setError(data.message || 'Failed to resend verification email');
-      }
+      setResendSuccess(true);
+      setResendEmail('');
     } catch (err) {
-      console.error('Resend verification error:', err);
-      setError('Network error. Please try again.');
-    } finally {
-      setResending(false);
+      setError(err.message || 'Failed to resend verification email');
     }
   };
 
@@ -279,16 +235,16 @@ function VerifyEmailContent() {
                       required
                       placeholder="your.email@example.com"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                      disabled={resending}
+                      disabled={resendMutation.isPending}
                     />
                   </div>
 
                   <button
                     type="submit"
-                    disabled={resending}
+                    disabled={resendMutation.isPending}
                     className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
                   >
-                    {resending ? (
+                    {resendMutation.isPending ? (
                       <span className="flex items-center justify-center">
                         <svg
                           className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"

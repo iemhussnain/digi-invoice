@@ -3,12 +3,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useRegister } from '@/hooks/useAuth';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
+
+  // React Query mutation
+  const registerMutation = useRegister();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -46,48 +49,26 @@ export default function RegisterPage() {
   // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setErrors({});
     setSuccessMessage('');
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const data = await registerMutation.mutateAsync(formData);
 
-      const data = await response.json();
+      // Success
+      setSuccessMessage(data.message);
 
-      if (response.ok) {
-        // Success
-        setSuccessMessage(data.message);
-
-        // Store token in localStorage
-        if (data.data?.token) {
-          localStorage.setItem('token', data.data.token);
-          localStorage.setItem('user', JSON.stringify(data.data.user));
-        }
-
-        // Redirect to dashboard after 1 second
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 1000);
-      } else {
-        // Error
-        if (data.errors) {
-          setErrors(data.errors);
-        } else {
-          setErrors({ general: data.message || 'Registration failed' });
-        }
-      }
+      // Redirect to dashboard after 1 second
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1000);
     } catch (error) {
-      console.error('Registration error:', error);
-      setErrors({ general: 'Network error. Please try again.' });
-    } finally {
-      setLoading(false);
+      // Error handling
+      if (error.errors) {
+        setErrors(error.errors);
+      } else {
+        setErrors({ general: error.message || 'Registration failed' });
+      }
     }
   };
 
@@ -378,14 +359,14 @@ export default function RegisterPage() {
           <div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={registerMutation.isPending}
               className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white ${
-                loading
+                registerMutation.isPending
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
               }`}
             >
-              {loading ? 'Creating Account...' : 'Create Account'}
+              {registerMutation.isPending ? 'Creating Account...' : 'Create Account'}
             </button>
           </div>
 

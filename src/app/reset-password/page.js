@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useVerifyResetToken, useResetPassword } from '@/hooks/useAuth';
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -11,89 +12,55 @@ function ResetPasswordForm() {
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [verifying, setVerifying] = useState(true);
   const [error, setError] = useState('');
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
-  const [tokenValid, setTokenValid] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Verify token on mount
+  // React Query hooks
+  const { data: tokenData, isLoading: verifying, error: tokenError } = useVerifyResetToken(token);
+  const resetPasswordMutation = useResetPassword();
+
+  const tokenValid = !!tokenData;
+  const userInfo = tokenData?.user;
+
+  // Set error from token verification
   useEffect(() => {
     if (!token) {
       setError('Invalid reset link. Please request a new password reset.');
-      setVerifying(false);
-      return;
+    } else if (tokenError) {
+      setError(tokenError.message || 'This password reset link is invalid or has expired.');
     }
-
-    verifyToken();
-  }, [token]);
-
-  const verifyToken = async () => {
-    try {
-      const response = await fetch(`/api/auth/reset-password?token=${token}`);
-      const data = await response.json();
-
-      if (response.ok && data.data.valid) {
-        setTokenValid(true);
-        setUserInfo(data.data.user);
-      } else {
-        setError(data.error?.message || 'This password reset link is invalid or has expired.');
-      }
-    } catch (err) {
-      console.error('Token verification error:', err);
-      setError('Failed to verify reset link. Please try again.');
-    } finally {
-      setVerifying(false);
-    }
-  };
+  }, [token, tokenError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setErrors({});
-    setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          token,
-          password,
-          confirmPassword,
-        }),
+      await resetPasswordMutation.mutateAsync({
+        token,
+        password,
+        confirmPassword,
       });
 
-      const data = await response.json();
+      setSuccess(true);
+      setPassword('');
+      setConfirmPassword('');
 
-      if (response.ok) {
-        setSuccess(true);
-        setPassword('');
-        setConfirmPassword('');
-
-        // Redirect to login after 3 seconds
-        setTimeout(() => {
-          router.push('/login');
-        }, 3000);
-      } else {
-        // Handle validation errors
-        if (data.error && typeof data.error === 'object') {
-          setErrors(data.error);
-          setError(data.error.token || data.message || 'Failed to reset password');
-        } else {
-          setError(data.message || 'Failed to reset password');
-        }
-      }
+      // Redirect to login after 3 seconds
+      setTimeout(() => {
+        router.push('/login');
+      }, 3000);
     } catch (err) {
-      console.error('Reset password error:', err);
-      setError('Network error. Please check your connection and try again.');
-    } finally {
-      setLoading(false);
+      // Handle validation errors
+      if (err.errors && typeof err.errors === 'object') {
+        setErrors(err.errors);
+        setError(err.errors.token || err.message || 'Failed to reset password');
+      } else {
+        setError(err.message || 'Failed to reset password');
+      }
     }
   };
 
@@ -297,7 +264,7 @@ function ResetPasswordForm() {
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition pr-10 ${
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  disabled={loading}
+                  disabled={resetPasswordMutation.isPending}
                 />
                 <button
                   type="button"
@@ -387,7 +354,7 @@ function ResetPasswordForm() {
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition ${
                   errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
                 }`}
-                disabled={loading}
+                disabled={resetPasswordMutation.isPending}
               />
               {errors.confirmPassword && (
                 <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
@@ -454,10 +421,10 @@ function ResetPasswordForm() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={resetPasswordMutation.isPending}
               className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {loading ? (
+              {resetPasswordMutation.isPending ? (
                 <span className="flex items-center justify-center">
                   <svg
                     className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"

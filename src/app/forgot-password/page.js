@@ -4,54 +4,36 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { showSuccess, showError } from '@/utils/toast';
+import { useForgotPassword } from '@/hooks/useAuth';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [devInfo, setDevInfo] = useState(null);
+
+  // React Query mutation
+  const forgotPasswordMutation = useForgotPassword();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess(false);
     setDevInfo(null);
-    setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
+      const data = await forgotPasswordMutation.mutateAsync(email);
 
-      const data = await response.json();
+      setSuccess(true);
+      setEmail(''); // Clear email field
 
-      if (response.ok) {
-        setSuccess(true);
-        setEmail(''); // Clear email field
-
-        // Show dev info if available
-        if (data.data.dev) {
-          setDevInfo(data.data.dev);
-        }
-      } else {
-        // Handle validation errors
-        if (data.error && typeof data.error === 'object') {
-          setError(data.error.email || 'Failed to send reset email');
-        } else {
-          setError(data.message || 'Failed to send reset email');
-        }
+      // Show dev info if available
+      if (data.data?.dev) {
+        setDevInfo(data.data.dev);
       }
     } catch (err) {
-      console.error('Forgot password error:', err);
-      setError('Network error. Please check your connection and try again.');
-    } finally {
-      setLoading(false);
+      setError(err.message || 'Failed to send reset email');
     }
   };
 
@@ -197,16 +179,16 @@ export default function ForgotPasswordPage() {
                 required
                 placeholder="your.email@example.com"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                disabled={loading}
+                disabled={forgotPasswordMutation.isPending}
               />
             </div>
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={forgotPasswordMutation.isPending}
               className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {loading ? (
+              {forgotPasswordMutation.isPending ? (
                 <span className="flex items-center justify-center">
                   <svg
                     className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
