@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -175,9 +176,12 @@ export default function LoginPage() {
                 autoComplete="email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`mt-1 block w-full px-3 py-2 border ${
+                className={cn(
+                  'mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm',
+                  'focus:outline-none focus:ring-2 focus:ring-blue-500',
+                  'dark:bg-gray-700 dark:text-white',
                   errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white`}
+                )}
                 placeholder="you@example.com"
               />
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
@@ -195,9 +199,12 @@ export default function LoginPage() {
                 autoComplete="current-password"
                 value={formData.password}
                 onChange={handleChange}
-                className={`mt-1 block w-full px-3 py-2 border ${
+                className={cn(
+                  'mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm',
+                  'focus:outline-none focus:ring-2 focus:ring-blue-500',
+                  'dark:bg-gray-700 dark:text-white',
                   errors.password ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                } rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white`}
+                )}
                 placeholder="Enter your password"
               />
               {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
@@ -230,11 +237,12 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white ${
+              className={cn(
+                'w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white',
                 loading
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-              }`}
+              )}
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </button>

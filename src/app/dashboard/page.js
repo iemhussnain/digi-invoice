@@ -9,6 +9,7 @@ import SalesAnalyticsChart from '@/components/charts/SalesAnalyticsChart';
 import MonthlyComparisonChart from '@/components/charts/MonthlyComparisonChart';
 import TopCustomersChart from '@/components/charts/TopCustomersChart';
 import TopSuppliersChart from '@/components/charts/TopSuppliersChart';
+import { DashboardSkeleton } from '@/components/ui/LoadingSkeleton';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -72,11 +73,15 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
+      <div className="min-h-screen bg-gray-100">
+        <header className="bg-white shadow">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <h1 className="text-2xl font-bold text-gray-900">DigInvoice ERP</h1>
+          </div>
+        </header>
+        <main>
+          <DashboardSkeleton />
+        </main>
       </div>
     );
   }

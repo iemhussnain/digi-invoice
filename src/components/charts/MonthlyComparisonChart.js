@@ -11,6 +11,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { cn } from '@/lib/utils';
 
 export default function MonthlyComparisonChart({ data, height = 300 }) {
   // Sample data comparing current month vs previous month
@@ -96,11 +97,11 @@ export default function MonthlyComparisonChart({ data, height = 300 }) {
             ${previousYearTotal.toLocaleString()}
           </div>
         </div>
-        <div className={`${growth >= 0 ? 'bg-green-50' : 'bg-red-50'} rounded p-3`}>
-          <div className={`text-sm ${growth >= 0 ? 'text-green-700' : 'text-red-700'} font-medium`}>
+        <div className={cn('rounded p-3', growth >= 0 ? 'bg-green-50' : 'bg-red-50')}>
+          <div className={cn('text-sm font-medium', growth >= 0 ? 'text-green-700' : 'text-red-700')}>
             Growth Rate
           </div>
-          <div className={`text-xl font-bold ${growth >= 0 ? 'text-green-900' : 'text-red-900'}`}>
+          <div className={cn('text-xl font-bold', growth >= 0 ? 'text-green-900' : 'text-red-900')}>
             {growth >= 0 ? '+' : ''}{growth}%
           </div>
         </div>
