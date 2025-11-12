@@ -116,18 +116,18 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Card */}
+        {/* Welcome Card - Compact */}
         <motion.div
           initial="initial"
           animate="animate"
           variants={fadeInUp}
-          className="bg-white rounded-lg shadow-lg p-6 mb-6"
+          className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-lg p-4 mb-6 text-white"
         >
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Welcome, {user?.name}! 🎉
+          <h2 className="text-xl font-bold mb-1">
+            Welcome back, {user?.name}! 👋
           </h2>
-          <p className="text-gray-600">
-            You have successfully logged in to your dashboard.
+          <p className="text-blue-100 text-sm">
+            {organization?.name} • {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </motion.div>
 
@@ -136,84 +136,169 @@ export default function DashboardPage() {
           initial="hidden"
           animate="visible"
           variants={listContainerVariants}
-          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6"
+          className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6"
         >
-          <motion.div variants={listItemVariants} className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="rounded-md bg-blue-500 p-3">
-                  <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                </div>
+          <motion.div variants={listItemVariants} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500">Total Users</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">12</p>
               </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Users</dt>
-                  <dd className="text-lg font-semibold text-gray-900">12</dd>
-                </dl>
+              <div className="rounded-lg bg-blue-100 p-3">
+                <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
               </div>
             </div>
           </motion.div>
 
-          <motion.div variants={listItemVariants} className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="rounded-md bg-green-500 p-3">
-                  <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
+          <motion.div variants={listItemVariants} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500">Invoices</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">245</p>
               </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Invoices</dt>
-                  <dd className="text-lg font-semibold text-gray-900">245</dd>
-                </dl>
+              <div className="rounded-lg bg-green-100 p-3">
+                <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
               </div>
             </div>
           </motion.div>
 
-          <motion.div variants={listItemVariants} className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="rounded-md bg-purple-500 p-3">
-                  <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
+          <motion.div variants={listItemVariants} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500">Customers</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">89</p>
               </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Customers</dt>
-                  <dd className="text-lg font-semibold text-gray-900">89</dd>
-                </dl>
+              <div className="rounded-lg bg-purple-100 p-3">
+                <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
               </div>
             </div>
           </motion.div>
 
-          <motion.div variants={listItemVariants} className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="rounded-md bg-orange-500 p-3">
-                  <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                  </svg>
-                </div>
+          <motion.div variants={listItemVariants} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500">Products</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">156</p>
               </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Products</dt>
-                  <dd className="text-lg font-semibold text-gray-900">156</dd>
-                </dl>
+              <div className="rounded-lg bg-orange-100 p-3">
+                <svg className="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
               </div>
             </div>
           </motion.div>
         </motion.div>
 
+        {/* Quick Actions - Moved Up */}
+        <motion.div
+          initial="initial"
+          animate="animate"
+          variants={fadeInUp}
+          className="bg-white rounded-lg shadow-md p-6 mb-6"
+        >
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-lg font-bold text-gray-900">
+              ⚡ Quick Actions
+            </h3>
+            <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+              11 Modules
+            </span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            <Link
+              href="/admin/sales"
+              className="group bg-gradient-to-br from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 border-2 border-emerald-300 text-emerald-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+            >
+              <div className="text-2xl mb-2">💵</div>
+              <div className="text-sm">Quick Sale</div>
+            </Link>
+            <Link
+              href="/admin/customers"
+              className="group bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 text-orange-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+            >
+              <div className="text-2xl mb-2">👥</div>
+              <div className="text-sm">Customers</div>
+            </Link>
+            <Link
+              href="/admin/suppliers"
+              className="group bg-gradient-to-br from-amber-50 to-amber-100 hover:from-amber-100 hover:to-amber-200 text-amber-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+            >
+              <div className="text-2xl mb-2">🏭</div>
+              <div className="text-sm">Suppliers</div>
+            </Link>
+            <Link
+              href="/admin/purchase-orders"
+              className="group bg-gradient-to-br from-cyan-50 to-cyan-100 hover:from-cyan-100 hover:to-cyan-200 text-cyan-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+            >
+              <div className="text-2xl mb-2">📦</div>
+              <div className="text-sm">Purchase Orders</div>
+            </Link>
+            <Link
+              href="/admin/grn"
+              className="group bg-gradient-to-br from-lime-50 to-lime-100 hover:from-lime-100 hover:to-lime-200 text-lime-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+            >
+              <div className="text-2xl mb-2">✅</div>
+              <div className="text-sm">Goods Receipt</div>
+            </Link>
+            <Link
+              href="/admin/purchase-invoices"
+              className="group bg-gradient-to-br from-rose-50 to-rose-100 hover:from-rose-100 hover:to-rose-200 text-rose-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+            >
+              <div className="text-2xl mb-2">📄</div>
+              <div className="text-sm">Purchase Invoices</div>
+            </Link>
+            <Link
+              href="/admin/invoices"
+              className="group bg-gradient-to-br from-teal-50 to-teal-100 hover:from-teal-100 hover:to-teal-200 text-teal-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+            >
+              <div className="text-2xl mb-2">🧾</div>
+              <div className="text-sm">Sales Invoices</div>
+            </Link>
+            <Link
+              href="/admin/vouchers"
+              className="group bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 text-green-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+            >
+              <div className="text-2xl mb-2">📝</div>
+              <div className="text-sm">Vouchers</div>
+            </Link>
+            <Link
+              href="/admin/reports"
+              className="group bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 text-purple-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+            >
+              <div className="text-2xl mb-2">📈</div>
+              <div className="text-sm">Reports</div>
+            </Link>
+            <Link
+              href="/admin/accounts"
+              className="group bg-gradient-to-br from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 text-indigo-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+            >
+              <div className="text-2xl mb-2">📊</div>
+              <div className="text-sm">Accounts</div>
+            </Link>
+            <Link
+              href="/admin/roles"
+              className="group bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 text-blue-700 font-semibold py-4 px-3 rounded-xl text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+            >
+              <div className="text-2xl mb-2">🔐</div>
+              <div className="text-sm">Roles</div>
+            </Link>
+          </div>
+        </motion.div>
+
         {/* Analytics Charts */}
         <div className="mb-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Analytics Dashboard</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900">📊 Analytics Overview</h2>
+            <span className="text-xs text-blue-600 bg-blue-50 px-3 py-1 rounded-full font-medium">
+              Real-time data
+            </span>
+          </div>
 
           {/* Revenue & Expense + Sales Analytics */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -233,150 +318,71 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* User Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Your Information
-            </h3>
-            <dl className="space-y-2">
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Name</dt>
-                <dd className="text-sm text-gray-900">{user?.name}</dd>
+        {/* User Info - Compact Cards at Bottom */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-lg shadow-sm p-5">
+            <div className="flex items-center mb-3">
+              <div className="bg-blue-100 rounded-full p-2 mr-3">
+                <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
               </div>
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Email</dt>
-                <dd className="text-sm text-gray-900">{user?.email}</dd>
+              <h3 className="text-base font-bold text-gray-900">Your Profile</h3>
+            </div>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Name:</span>
+                <span className="text-gray-900 font-medium">{user?.name}</span>
               </div>
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Role</dt>
-                <dd className="text-sm text-gray-900">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {user?.role}
-                  </span>
-                </dd>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Email:</span>
+                <span className="text-gray-900 font-medium">{user?.email}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Role:</span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  {user?.role}
+                </span>
               </div>
               {user?.phone && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Phone</dt>
-                  <dd className="text-sm text-gray-900">{user.phone}</dd>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Phone:</span>
+                  <span className="text-gray-900 font-medium">{user.phone}</span>
                 </div>
               )}
-            </dl>
+            </div>
           </div>
 
           {organization && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Organization
-              </h3>
-              <dl className="space-y-2">
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Company</dt>
-                  <dd className="text-sm text-gray-900">{organization.name}</dd>
+            <div className="bg-white rounded-lg shadow-sm p-5">
+              <div className="flex items-center mb-3">
+                <div className="bg-green-100 rounded-full p-2 mr-3">
+                  <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
                 </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Plan</dt>
-                  <dd className="text-sm text-gray-900">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      {organization.subscription?.plan}
-                    </span>
-                  </dd>
+                <h3 className="text-base font-bold text-gray-900">Organization</h3>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Company:</span>
+                  <span className="text-gray-900 font-medium">{organization.name}</span>
                 </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Status</dt>
-                  <dd className="text-sm text-gray-900">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                      {organization.subscription?.status}
-                    </span>
-                  </dd>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Plan:</span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    {organization.subscription?.plan}
+                  </span>
                 </div>
-              </dl>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Status:</span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    {organization.subscription?.status}
+                  </span>
+                </div>
+              </div>
             </div>
           )}
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Quick Actions
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-9 gap-4">
-            <Link
-              href="/admin/sales"
-              className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold py-4 px-4 rounded-lg text-center transition border-2 border-emerald-300"
-            >
-              💵 Quick Sale
-            </Link>
-            <Link
-              href="/admin/customers"
-              className="bg-orange-50 hover:bg-orange-100 text-orange-700 font-semibold py-4 px-4 rounded-lg text-center transition"
-            >
-              👥 Customers
-            </Link>
-            <Link
-              href="/admin/suppliers"
-              className="bg-amber-50 hover:bg-amber-100 text-amber-700 font-semibold py-4 px-4 rounded-lg text-center transition"
-            >
-              🏭 Suppliers
-            </Link>
-            <Link
-              href="/admin/purchase-orders"
-              className="bg-cyan-50 hover:bg-cyan-100 text-cyan-700 font-semibold py-4 px-4 rounded-lg text-center transition"
-            >
-              📦 Purchase Orders
-            </Link>
-            <Link
-              href="/admin/grn"
-              className="bg-lime-50 hover:bg-lime-100 text-lime-700 font-semibold py-4 px-4 rounded-lg text-center transition"
-            >
-              ✅ Goods Receipt
-            </Link>
-            <Link
-              href="/admin/purchase-invoices"
-              className="bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold py-4 px-4 rounded-lg text-center transition"
-            >
-              📄 Purchase Invoices
-            </Link>
-            <Link
-              href="/admin/invoices"
-              className="bg-teal-50 hover:bg-teal-100 text-teal-700 font-semibold py-4 px-4 rounded-lg text-center transition"
-            >
-              🧾 Sales Invoices
-            </Link>
-            <Link
-              href="/admin/vouchers"
-              className="bg-green-50 hover:bg-green-100 text-green-700 font-semibold py-4 px-4 rounded-lg text-center transition"
-            >
-              📝 Vouchers
-            </Link>
-            <Link
-              href="/admin/reports"
-              className="bg-purple-50 hover:bg-purple-100 text-purple-700 font-semibold py-4 px-4 rounded-lg text-center transition"
-            >
-              📈 Reports
-            </Link>
-            <Link
-              href="/admin/accounts"
-              className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold py-4 px-4 rounded-lg text-center transition"
-            >
-              📊 Chart of Accounts
-            </Link>
-            <Link
-              href="/admin/roles"
-              className="bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-4 px-4 rounded-lg text-center transition"
-            >
-              🔐 Roles & Permissions
-            </Link>
-          </div>
-        </div>
-
-        {/* Info Notice */}
-        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
-          <p className="font-medium">📊 Analytics Dashboard Active!</p>
-          <p className="text-sm mt-1">
-            View real-time charts and analytics for revenue, expenses, sales, and top customers/suppliers.
-          </p>
         </div>
       </main>
     </div>
