@@ -1,102 +1,42 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { exportSalesReport } from '@/utils/excelExport';
-import { showSuccess, showError, showPromise } from '@/utils/toast';
+import { showPromise } from '@/utils/toast';
+import { useInvoices, usePostInvoice, useDeleteInvoice } from '@/hooks/useInvoices';
 
 export default function InvoicesPage() {
   const router = useRouter();
-  const [invoices, setInvoices] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState(null);
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPayment, setFilterPayment] = useState('all');
-  const [deleting, setDeleting] = useState(null);
-  const [posting, setPosting] = useState(null);
 
-  useEffect(() => {
-    fetchInvoices();
-  }, [page, search, filterStatus, filterPayment]);
+  // React Query hooks
+  const { data, isLoading, error: queryError } = useInvoices({ page, search, filterStatus, filterPayment });
+  const postInvoice = usePostInvoice();
+  const deleteInvoice = useDeleteInvoice();
 
-  const fetchInvoices = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '20',
-      });
-
-      if (search) params.append('search', search);
-      if (filterStatus !== 'all') params.append('status', filterStatus);
-      if (filterPayment !== 'all') params.append('paymentStatus', filterPayment);
-
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/invoices?${params.toString()}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setInvoices(data.data.invoices);
-        setPagination(data.data.pagination);
-      } else {
-        setError(data.message);
-      }
-    } catch (err) {
-      setError('Failed to load invoices');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const invoices = data?.invoices || [];
+  const pagination = data?.pagination || null;
+  const error = queryError?.message || null;
 
   const handlePost = async (invoiceId) => {
     if (!confirm('Are you sure you want to post this invoice? This will create accounting entries.')) {
       return;
     }
 
-    try {
-      setPosting(invoiceId);
-
-      const token = localStorage.getItem('token');
-
-      await showPromise(
-        fetch(`/api/invoices/${invoiceId}/post`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }).then(async (response) => {
-          const data = await response.json();
-          if (data.success) {
-            fetchInvoices();
-            return data;
-          } else {
-            throw new Error(data.message || 'Failed to post invoice');
-          }
-        }),
-        {
-          loading: 'Posting invoice...',
-          success: 'Invoice posted successfully!',
-          error: (err) => err.message || 'Failed to post invoice',
-        }
-      );
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setPosting(null);
-    }
+    await showPromise(
+      postInvoice.mutateAsync(invoiceId),
+      {
+        loading: 'Posting invoice...',
+        success: 'Invoice posted successfully!',
+        error: (err) => err.message || 'Failed to post invoice',
+      }
+    );
   };
 
   const handleDelete = async (invoiceId) => {
@@ -104,37 +44,14 @@ export default function InvoicesPage() {
       return;
     }
 
-    try {
-      setDeleting(invoiceId);
-
-      const token = localStorage.getItem('token');
-
-      await showPromise(
-        fetch(`/api/invoices/${invoiceId}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }).then(async (response) => {
-          const data = await response.json();
-          if (data.success) {
-            fetchInvoices();
-            return data;
-          } else {
-            throw new Error(data.message || 'Failed to delete invoice');
-          }
-        }),
-        {
-          loading: 'Deleting invoice...',
-          success: 'Invoice deleted successfully!',
-          error: (err) => err.message || 'Failed to delete invoice',
-        }
-      );
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setDeleting(null);
-    }
+    await showPromise(
+      deleteInvoice.mutateAsync(invoiceId),
+      {
+        loading: 'Deleting invoice...',
+        success: 'Invoice deleted successfully!',
+        error: (err) => err.message || 'Failed to delete invoice',
+      }
+    );
   };
 
   const formatCurrency = (amount) => {
@@ -165,7 +82,7 @@ export default function InvoicesPage() {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setPage(1);
-    fetchInvoices();
+    // React Query will automatically refetch when page changes
   };
 
   return (
@@ -289,7 +206,7 @@ export default function InvoicesPage() {
             )}
           </div>
 
-          {loading ? (
+          {isLoading ? (
             <div className="p-12 text-center">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
               <p className="mt-4 text-gray-600">Loading invoices...</p>
@@ -401,10 +318,10 @@ export default function InvoicesPage() {
                             {!invoice.isPosted && invoice.status !== 'cancelled' && (
                               <button
                                 onClick={() => handlePost(invoice._id)}
-                                disabled={posting === invoice._id}
+                                disabled={postInvoice.isPending}
                                 className="text-green-600 hover:text-green-900 disabled:opacity-50"
                               >
-                                {posting === invoice._id ? 'Posting...' : 'Post'}
+                                {postInvoice.isPending ? 'Posting...' : 'Post'}
                               </button>
                             )}
                             {!invoice.isPosted && (
@@ -417,10 +334,10 @@ export default function InvoicesPage() {
                                 </Link>
                                 <button
                                   onClick={() => handleDelete(invoice._id)}
-                                  disabled={deleting === invoice._id}
+                                  disabled={deleteInvoice.isPending}
                                   className="text-red-600 hover:text-red-900 disabled:opacity-50"
                                 >
-                                  {deleting === invoice._id ? 'Deleting...' : 'Delete'}
+                                  {deleteInvoice.isPending ? 'Deleting...' : 'Delete'}
                                 </button>
                               </>
                             )}
