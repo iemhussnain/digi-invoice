@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCustomer, useUpdateCustomer } from '@/hooks/useCustomers';
+import { useFBRProvinces } from '@/hooks/useFBRProvinces';
 
 export default function EditCustomerPage({ params }) {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function EditCustomerPage({ params }) {
 
   const { data: customerData, isLoading, isError, error } = useCustomer(id);
   const updateCustomer = useUpdateCustomer();
+  const { data: provinces = [], isLoading: provincesLoading } = useFBRProvinces('production');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -447,14 +449,21 @@ export default function EditCustomerPage({ params }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
-                <input
-                  type="text"
+                <label className="block text-sm font-medium text-gray-700 mb-2">Province</label>
+                <select
                   name="billingState"
                   value={formData.billingState}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                  disabled={provincesLoading}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                >
+                  <option value="">Select Province</option>
+                  {provinces.map((province) => (
+                    <option key={province.stateProvinceCode} value={province.stateProvinceName}>
+                      {province.stateProvinceName}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>

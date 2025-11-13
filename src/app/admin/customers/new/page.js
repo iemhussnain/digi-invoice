@@ -6,10 +6,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { customerSchema } from '@/schemas/business';
 import { useCreateCustomer } from '@/hooks/useCustomers';
+import { useFBRProvinces } from '@/hooks/useFBRProvinces';
 
 export default function NewCustomerPage() {
   const router = useRouter();
   const createCustomer = useCreateCustomer();
+  const { data: provinces = [], isLoading: provincesLoading } = useFBRProvinces('production');
 
   const {
     register,
@@ -321,12 +323,19 @@ export default function NewCustomerPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
-                <input
-                  type="text"
+                <label className="block text-sm font-medium text-gray-700 mb-2">Province</label>
+                <select
                   {...register('billingState')}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                  disabled={provincesLoading}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                >
+                  <option value="">Select Province</option>
+                  {provinces.map((province) => (
+                    <option key={province.stateProvinceCode} value={province.stateProvinceName}>
+                      {province.stateProvinceName}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -391,12 +400,19 @@ export default function NewCustomerPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
-                  <input
-                    type="text"
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Province</label>
+                  <select
                     {...register('shippingState')}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
+                    disabled={provincesLoading}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">Select Province</option>
+                    {provinces.map((province) => (
+                      <option key={province.stateProvinceCode} value={province.stateProvinceName}>
+                        {province.stateProvinceName}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>

@@ -34,9 +34,10 @@ function formatDateYYYYMMDD(date) {
  * Get Province Codes
  * Endpoint: GET /pdi/v1/provinces
  * Returns list of all provinces with codes and descriptions
+ * @param {string} environment - 'sandbox' or 'production' (defaults to production)
  */
-export async function getProvinceCodes() {
-  return fbrApiGet('/pdi/v1/provinces');
+export async function getProvinceCodes(environment = 'production') {
+  return fbrApiGet('/pdi/v1/provinces', {}, environment);
 }
 
 /**
