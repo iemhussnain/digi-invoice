@@ -10,28 +10,34 @@ const FBR_API_BASE_URL = process.env.NEXT_PUBLIC_FBR_API_BASE_URL || 'https://gw
  * Get FBR auth token from localStorage or environment variable
  * Priority: localStorage > environment variable
  * This should be the token provided by FBR for API access
+ * @param {string} environment - 'sandbox' or 'production' (defaults to production)
  */
-export function getFBRAuthToken() {
+export function getFBRAuthToken(environment = 'production') {
   // Try localStorage first (for runtime token updates)
   if (typeof window !== 'undefined') {
-    const localToken = localStorage.getItem('fbr_token');
+    const tokenKey = environment === 'sandbox' ? 'fbr_sandbox_token' : 'fbr_production_token';
+    const localToken = localStorage.getItem(tokenKey);
     if (localToken) {
       return localToken;
     }
   }
 
   // Fallback to environment variable
-  return process.env.NEXT_PUBLIC_FBR_TOKEN || null;
+  if (environment === 'sandbox') {
+    return process.env.NEXT_PUBLIC_FBR_SANDBOX_TOKEN || null;
+  }
+  return process.env.NEXT_PUBLIC_FBR_PRODUCTION_TOKEN || process.env.NEXT_PUBLIC_FBR_TOKEN || null;
 }
 
 /**
  * Generic FBR API fetch function with automatic token injection
  * @param {string} endpoint - API endpoint (e.g., '/pdi/v1/provinces')
  * @param {object} options - Fetch options
+ * @param {string} environment - 'sandbox' or 'production' (defaults to production)
  * @returns {Promise<any>} - Parsed JSON response
  */
-export async function fbrApiFetch(endpoint, options = {}) {
-  const token = getFBRAuthToken();
+export async function fbrApiFetch(endpoint, options = {}, environment = 'production') {
+  const token = getFBRAuthToken(environment);
 
   const config = {
     headers: {
@@ -84,46 +90,52 @@ export async function fbrApiFetch(endpoint, options = {}) {
  * Helper method for GET requests
  * @param {string} endpoint - API endpoint
  * @param {object} params - Query parameters
+ * @param {string} environment - 'sandbox' or 'production' (defaults to production)
  * @returns {Promise<any>}
  */
-export async function fbrApiGet(endpoint, params = {}) {
+export async function fbrApiGet(endpoint, params = {}, environment = 'production') {
   // Build query string
   const queryString = new URLSearchParams(params).toString();
   const url = queryString ? `${endpoint}?${queryString}` : endpoint;
 
   return fbrApiFetch(url, {
     method: 'GET',
-  });
+  }, environment);
 }
 
 /**
  * Helper method for POST requests
  * @param {string} endpoint - API endpoint
  * @param {object} data - Request body
+ * @param {string} environment - 'sandbox' or 'production' (defaults to production)
  * @returns {Promise<any>}
  */
-export async function fbrApiPost(endpoint, data) {
+export async function fbrApiPost(endpoint, data, environment = 'production') {
   return fbrApiFetch(endpoint, {
     method: 'POST',
     body: JSON.stringify(data),
-  });
+  }, environment);
 }
 
 /**
  * Set FBR auth token in localStorage
  * @param {string} token - FBR API token
+ * @param {string} environment - 'sandbox' or 'production' (defaults to production)
  */
-export function setFBRAuthToken(token) {
+export function setFBRAuthToken(token, environment = 'production') {
   if (typeof window !== 'undefined') {
-    localStorage.setItem('fbr_token', token);
+    const tokenKey = environment === 'sandbox' ? 'fbr_sandbox_token' : 'fbr_production_token';
+    localStorage.setItem(tokenKey, token);
   }
 }
 
 /**
  * Remove FBR auth token from localStorage
+ * @param {string} environment - 'sandbox' or 'production' (defaults to production)
  */
-export function removeFBRAuthToken() {
+export function removeFBRAuthToken(environment = 'production') {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem('fbr_token');
+    const tokenKey = environment === 'sandbox' ? 'fbr_sandbox_token' : 'fbr_production_token';
+    localStorage.removeItem(tokenKey);
   }
 }

@@ -43,9 +43,12 @@ export async function GET(request) {
       provinceNumber: user.fbrCredentials?.provinceNumber || null,
       businessAddress: user.fbrCredentials?.businessAddress || '',
       gst: user.fbrCredentials?.gst || '',
-      hasToken: !!user.fbrCredentials?.token,
-      tokenExpiry: user.fbrCredentials?.tokenExpiry || null,
-      tokenUpdatedAt: user.fbrCredentials?.tokenUpdatedAt || null,
+      hasSandboxToken: !!user.fbrCredentials?.sandboxToken,
+      sandboxTokenExpiry: user.fbrCredentials?.sandboxTokenExpiry || null,
+      sandboxTokenUpdatedAt: user.fbrCredentials?.sandboxTokenUpdatedAt || null,
+      hasProductionToken: !!user.fbrCredentials?.productionToken,
+      productionTokenExpiry: user.fbrCredentials?.productionTokenExpiry || null,
+      productionTokenUpdatedAt: user.fbrCredentials?.productionTokenUpdatedAt || null,
     };
 
     return NextResponse.json({
@@ -80,14 +83,16 @@ export async function PUT(request) {
 
     const body = await request.json();
     const {
-      token,
+      sandboxToken,
+      productionToken,
       ntn,
       businessName,
       province,
       provinceNumber,
       businessAddress,
       gst,
-      tokenExpiry,
+      sandboxTokenExpiry,
+      productionTokenExpiry,
     } = body;
 
     // Build update object
@@ -100,18 +105,33 @@ export async function PUT(request) {
       'fbrCredentials.gst': gst,
     };
 
-    // Only update token if provided
-    if (token) {
-      updateData['fbrCredentials.token'] = token;
-      updateData['fbrCredentials.tokenUpdatedAt'] = new Date();
+    // Only update sandbox token if provided
+    if (sandboxToken) {
+      updateData['fbrCredentials.sandboxToken'] = sandboxToken;
+      updateData['fbrCredentials.sandboxTokenUpdatedAt'] = new Date();
 
       // Set expiry if provided, otherwise default to 1 year
-      if (tokenExpiry) {
-        updateData['fbrCredentials.tokenExpiry'] = new Date(tokenExpiry);
+      if (sandboxTokenExpiry) {
+        updateData['fbrCredentials.sandboxTokenExpiry'] = new Date(sandboxTokenExpiry);
       } else {
         const oneYearFromNow = new Date();
         oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
-        updateData['fbrCredentials.tokenExpiry'] = oneYearFromNow;
+        updateData['fbrCredentials.sandboxTokenExpiry'] = oneYearFromNow;
+      }
+    }
+
+    // Only update production token if provided
+    if (productionToken) {
+      updateData['fbrCredentials.productionToken'] = productionToken;
+      updateData['fbrCredentials.productionTokenUpdatedAt'] = new Date();
+
+      // Set expiry if provided, otherwise default to 1 year
+      if (productionTokenExpiry) {
+        updateData['fbrCredentials.productionTokenExpiry'] = new Date(productionTokenExpiry);
+      } else {
+        const oneYearFromNow = new Date();
+        oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+        updateData['fbrCredentials.productionTokenExpiry'] = oneYearFromNow;
       }
     }
 
@@ -139,9 +159,12 @@ export async function PUT(request) {
         provinceNumber: user.fbrCredentials?.provinceNumber,
         businessAddress: user.fbrCredentials?.businessAddress,
         gst: user.fbrCredentials?.gst,
-        hasToken: !!user.fbrCredentials?.token,
-        tokenExpiry: user.fbrCredentials?.tokenExpiry,
-        tokenUpdatedAt: user.fbrCredentials?.tokenUpdatedAt,
+        hasSandboxToken: !!user.fbrCredentials?.sandboxToken,
+        sandboxTokenExpiry: user.fbrCredentials?.sandboxTokenExpiry,
+        sandboxTokenUpdatedAt: user.fbrCredentials?.sandboxTokenUpdatedAt,
+        hasProductionToken: !!user.fbrCredentials?.productionToken,
+        productionTokenExpiry: user.fbrCredentials?.productionTokenExpiry,
+        productionTokenUpdatedAt: user.fbrCredentials?.productionTokenUpdatedAt,
       },
     });
   } catch (error) {
@@ -170,14 +193,17 @@ export async function DELETE(request) {
 
     await connectDB();
 
-    // Remove only the token, keep business info
+    // Remove both tokens, keep business info
     const user = await User.findByIdAndUpdate(
       authResult.user.userId,
       {
         $unset: {
-          'fbrCredentials.token': '',
-          'fbrCredentials.tokenExpiry': '',
-          'fbrCredentials.tokenUpdatedAt': '',
+          'fbrCredentials.sandboxToken': '',
+          'fbrCredentials.sandboxTokenExpiry': '',
+          'fbrCredentials.sandboxTokenUpdatedAt': '',
+          'fbrCredentials.productionToken': '',
+          'fbrCredentials.productionTokenExpiry': '',
+          'fbrCredentials.productionTokenUpdatedAt': '',
         },
       },
       { new: true }
@@ -192,7 +218,7 @@ export async function DELETE(request) {
 
     return NextResponse.json({
       success: true,
-      message: 'FBR token removed successfully',
+      message: 'FBR tokens removed successfully',
     });
   } catch (error) {
     console.error('Error removing FBR token:', error);

@@ -7,7 +7,7 @@ import Link from 'next/link';
 export default function FBRInvoiceNewPage() {
   const [userFBRInfo, setUserFBRInfo] = useState(null);
   const [clientsList, setClientsList] = useState([]);
-  const environment = 'production'; // Always use production
+  const [environment, setEnvironment] = useState('production'); // Default to production
 
   useEffect(() => {
     // Fetch user's FBR information from API or localStorage
@@ -122,6 +122,46 @@ export default function FBRInvoiceNewPage() {
             >
               ← Back to Invoices
             </Link>
+          </div>
+
+          {/* Environment Selector */}
+          <div className="mt-6 bg-white rounded-lg shadow p-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              FBR Environment
+            </label>
+            <div className="flex gap-4">
+              <label className="inline-flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  name="environment"
+                  value="sandbox"
+                  checked={environment === 'sandbox'}
+                  onChange={(e) => setEnvironment(e.target.value)}
+                  className="form-radio h-5 w-5 text-yellow-600 focus:ring-yellow-500"
+                />
+                <span className="ml-2 text-gray-700">
+                  🧪 <strong>Sandbox</strong> (Testing)
+                </span>
+              </label>
+              <label className="inline-flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  name="environment"
+                  value="production"
+                  checked={environment === 'production'}
+                  onChange={(e) => setEnvironment(e.target.value)}
+                  className="form-radio h-5 w-5 text-green-600 focus:ring-green-500"
+                />
+                <span className="ml-2 text-gray-700">
+                  🚀 <strong>Production</strong> (Live)
+                </span>
+              </label>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              {environment === 'sandbox'
+                ? 'Using Sandbox environment for testing. Invoices will not be sent to FBR.'
+                : 'Using Production environment. Invoices will be officially submitted to FBR.'}
+            </p>
           </div>
         </div>
 

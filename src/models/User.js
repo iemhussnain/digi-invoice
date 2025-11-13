@@ -154,10 +154,29 @@ const userSchema = new mongoose.Schema(
 
     // FBR Digital Invoicing Credentials
     fbrCredentials: {
-      token: {
+      // Sandbox Token
+      sandboxToken: {
         type: String,
         select: false, // Don't return token by default for security
       },
+      sandboxTokenExpiry: {
+        type: Date,
+      },
+      sandboxTokenUpdatedAt: {
+        type: Date,
+      },
+      // Production Token
+      productionToken: {
+        type: String,
+        select: false, // Don't return token by default for security
+      },
+      productionTokenExpiry: {
+        type: Date,
+      },
+      productionTokenUpdatedAt: {
+        type: Date,
+      },
+      // Business Information
       ntn: {
         type: String, // National Tax Number
         trim: true,
@@ -180,12 +199,6 @@ const userSchema = new mongoose.Schema(
       gst: {
         type: String, // GST Registration Number
         trim: true,
-      },
-      tokenExpiry: {
-        type: Date,
-      },
-      tokenUpdatedAt: {
-        type: Date,
       },
     },
 
