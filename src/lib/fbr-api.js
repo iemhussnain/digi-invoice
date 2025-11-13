@@ -7,18 +7,47 @@
 const FBR_API_BASE_URL = process.env.NEXT_PUBLIC_FBR_API_BASE_URL || 'https://gw.fbr.gov.pk';
 
 /**
+ * Migrate old token format to new format (one-time migration)
+ * Moves fbr_token to fbr_production_token if exists
+ */
+function migrateOldToken() {
+  if (typeof window !== 'undefined') {
+    const oldToken = localStorage.getItem('fbr_token');
+    const newProductionToken = localStorage.getItem('fbr_production_token');
+
+    // If old token exists but new production token doesn't, migrate it
+    if (oldToken && !newProductionToken) {
+      localStorage.setItem('fbr_production_token', oldToken);
+      // Keep old token for backward compatibility (will remove in future)
+      // localStorage.removeItem('fbr_token');
+    }
+  }
+}
+
+/**
  * Get FBR auth token from localStorage or environment variable
  * Priority: localStorage > environment variable
  * This should be the token provided by FBR for API access
  * @param {string} environment - 'sandbox' or 'production' (defaults to production)
  */
 export function getFBRAuthToken(environment = 'production') {
+  // Run migration on first call
+  migrateOldToken();
+
   // Try localStorage first (for runtime token updates)
   if (typeof window !== 'undefined') {
     const tokenKey = environment === 'sandbox' ? 'fbr_sandbox_token' : 'fbr_production_token';
     const localToken = localStorage.getItem(tokenKey);
     if (localToken) {
       return localToken;
+    }
+
+    // Fallback to old token key for backward compatibility
+    if (environment === 'production') {
+      const oldToken = localStorage.getItem('fbr_token');
+      if (oldToken) {
+        return oldToken;
+      }
     }
   }
 
