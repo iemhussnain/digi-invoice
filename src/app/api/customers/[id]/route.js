@@ -164,17 +164,15 @@ export async function DELETE(request, { params }) {
       });
 
       if (!customer) {
-        return errorResponse('Customer not found or already deleted', 404);
+        return errorResponse('Customer not found', 404);
       }
 
-      // Warning: Check if customer has outstanding balance
-      // You may want to settle the account first, but allowing deletion for now
+      // Check if customer has outstanding balance
       if (customer.currentBalance > 0) {
-        logger.warn('Deleting customer with outstanding balance', {
-          customerId: customer._id,
-          balance: customer.currentBalance,
-          userId: request.user._id,
-        });
+        return errorResponse(
+          'Cannot delete customer with outstanding balance. Please settle the account first.',
+          400
+        );
       }
 
       // Soft delete
