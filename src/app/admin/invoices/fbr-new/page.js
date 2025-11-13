@@ -7,7 +7,7 @@ import Link from 'next/link';
 export default function FBRInvoiceNewPage() {
   const [userFBRInfo, setUserFBRInfo] = useState(null);
   const [clientsList, setClientsList] = useState([]);
-  const [environment, setEnvironment] = useState('production'); // Production by default
+  const environment = 'production'; // Always use production
 
   useEffect(() => {
     // Fetch user's FBR information from API or localStorage
@@ -116,77 +116,13 @@ export default function FBRInvoiceNewPage() {
                 Federal Board of Revenue compliant digital invoicing system
               </p>
             </div>
-            <div className="flex items-center gap-4">
-              {/* Environment Selector */}
-              <div className="flex items-center gap-2 bg-white rounded-lg px-4 py-2 shadow-sm border-2 border-green-300">
-                <span className="text-sm font-semibold text-gray-700">Environment:</span>
-                <select
-                  value={environment}
-                  onChange={(e) => setEnvironment(e.target.value)}
-                  className="text-sm font-medium px-2 py-1 rounded border-2 border-green-400 text-green-700 bg-green-50 focus:outline-none focus:border-green-500"
-                >
-                  <option value="production">Production (Live)</option>
-                  <option value="sandbox">Sandbox (Testing)</option>
-                </select>
-              </div>
-
-              <Link
-                href="/admin/invoices"
-                className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium"
-              >
-                ← Back to Invoices
-              </Link>
-            </div>
+            <Link
+              href="/admin/invoices"
+              className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium"
+            >
+              ← Back to Invoices
+            </Link>
           </div>
-        </div>
-
-        {/* Environment Badge */}
-        <div className="mb-6">
-          {environment === 'sandbox' ? (
-            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 flex items-center gap-3">
-              <svg
-                className="h-5 w-5 text-yellow-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
-              <div>
-                <p className="font-semibold text-yellow-800">Testing Mode (Sandbox)</p>
-                <p className="text-sm text-yellow-700">
-                  This invoice will be sent to FBR Sandbox environment for testing purposes only
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4 flex items-center gap-3">
-              <svg
-                className="h-6 w-6 text-green-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <div>
-                <p className="font-bold text-green-800">✓ Production Mode (Live)</p>
-                <p className="text-sm text-green-700 font-medium">
-                  This invoice will be sent to FBR Live Production environment and will be officially recorded with Federal Board of Revenue
-                </p>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* FBR Invoice Form */}
