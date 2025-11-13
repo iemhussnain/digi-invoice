@@ -7,14 +7,21 @@
 const FBR_API_BASE_URL = process.env.NEXT_PUBLIC_FBR_API_BASE_URL || 'https://gw.fbr.gov.pk';
 
 /**
- * Get FBR auth token from localStorage
+ * Get FBR auth token from localStorage or environment variable
+ * Priority: localStorage > environment variable
  * This should be the token provided by FBR for API access
  */
 export function getFBRAuthToken() {
+  // Try localStorage first (for runtime token updates)
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('fbr_token');
+    const localToken = localStorage.getItem('fbr_token');
+    if (localToken) {
+      return localToken;
+    }
   }
-  return null;
+
+  // Fallback to environment variable
+  return process.env.NEXT_PUBLIC_FBR_TOKEN || null;
 }
 
 /**

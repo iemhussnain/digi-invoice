@@ -20,11 +20,11 @@ import {
  */
 export function useFBRData() {
   // Fetch all reference data using React Query hooks
-  const { data: provinces, isLoading: loadingProvinces } = useFBRProvinceCodes();
-  const { data: docTypes, isLoading: loadingDocTypes } = useFBRDocumentTypes();
-  const { data: transTypes, isLoading: loadingTransTypes } = useFBRTransactionTypes();
-  const { data: uoms, isLoading: loadingUoms } = useFBRUOMs();
-  const { data: items, isLoading: loadingItems } = useFBRItemCodes();
+  const { data: provinces, isLoading: loadingProvinces, error: provincesError } = useFBRProvinceCodes();
+  const { data: docTypes, isLoading: loadingDocTypes, error: docTypesError } = useFBRDocumentTypes();
+  const { data: transTypes, isLoading: loadingTransTypes, error: transTypesError } = useFBRTransactionTypes();
+  const { data: uoms, isLoading: loadingUoms, error: uomsError } = useFBRUOMs();
+  const { data: items, isLoading: loadingItems, error: itemsError } = useFBRItemCodes();
 
   // Format data to match your existing structure
   // Each item should have: { value, label, description }
