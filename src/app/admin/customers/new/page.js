@@ -467,8 +467,13 @@ export default function NewCustomerPage() {
                 <input
                   type="text"
                   {...register('strn')}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="11-11-1111-111-11"
+                  maxLength="18"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.strn ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 />
+                {errors.strn && <p className="mt-1 text-sm text-red-600">{errors.strn.message}</p>}
               </div>
 
               <div>

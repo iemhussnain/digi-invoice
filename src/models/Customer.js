@@ -164,6 +164,7 @@ const customerSchema = new Schema(
       type: String,
       trim: true,
       uppercase: true,
+      match: [/^[0-9]{2}-[0-9]{2}-[0-9]{4}-[0-9]{3}-[0-9]{2}$/, 'Invalid STRN format (11-11-1111-111-11)'],
     },
 
     gstRegistered: {

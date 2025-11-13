@@ -55,7 +55,11 @@ export const customerSchema = z.object({
     .regex(/^\d{7}-\d$/, 'Reference number must be in format 0000000-0')
     .optional()
     .or(z.literal('')),
-  strn: z.string().optional(),
+  strn: z
+    .string()
+    .regex(/^\d{2}-\d{2}-\d{4}-\d{3}-\d{2}$/, 'STRN must be in format 11-11-1111-111-11')
+    .optional()
+    .or(z.literal('')),
   cnic: z.string().optional(),
   gstRegistered: z.boolean().default(false),
 
