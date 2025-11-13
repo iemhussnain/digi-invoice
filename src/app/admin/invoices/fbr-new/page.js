@@ -73,7 +73,8 @@ export default function FBRInvoiceNewPage() {
           console.log('Customers API Response:', data);
 
           // Map customers to the format expected by the form
-          const formattedClients = (data.data || [])
+          // API returns paginated response: {success: true, data: {customers: [...], pagination: {...}}}
+          const formattedClients = (data.data.customers || [])
             .map((customer) => ({
               buyerNTNCNIC: customer.ntn || customer.cnic || '',
               buyerBusinessName: customer.name || customer.companyName || '',
