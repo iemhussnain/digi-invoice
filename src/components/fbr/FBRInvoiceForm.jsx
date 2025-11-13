@@ -577,7 +577,9 @@ const FBRInvoiceForm = ({
             Buyer Information
           </h3>
           <a
-            href="/buyers"
+            href="/admin/customers/new"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-700"
           >
             <svg
@@ -602,23 +604,33 @@ const FBRInvoiceForm = ({
             <Controller
               name="buyerBusinessName"
               control={control}
-              render={({ field }) => (
-                <Autocomplete
-                  label="Search Buyer"
-                  name="buyerBusinessName"
-                  value={field.value}
-                  onChange={field.onChange}
-                  onSelect={handleBuyerSelect}
-                  options={clientsList.map((client) => ({
-                    label: `${client.buyerBusinessName} (${client.buyerNTNCNIC})`,
-                    value: client.buyerBusinessName,
-                    ...client,
-                  }))}
-                  placeholder="Type to search buyer by name or NTN/CNIC"
-                  error={errors.buyerBusinessName?.message}
-                  required
-                />
-              )}
+              render={({ field }) => {
+                // Debug: Log clients list
+                console.log('FBR Form - clientsList:', clientsList);
+                console.log('FBR Form - clientsList length:', clientsList?.length);
+
+                const mappedOptions = clientsList.map((client) => ({
+                  label: `${client.buyerBusinessName} (${client.buyerNTNCNIC})`,
+                  value: client.buyerBusinessName,
+                  ...client,
+                }));
+
+                console.log('FBR Form - Mapped options:', mappedOptions);
+
+                return (
+                  <Autocomplete
+                    label="Search Buyer"
+                    name="buyerBusinessName"
+                    value={field.value}
+                    onChange={field.onChange}
+                    onSelect={handleBuyerSelect}
+                    options={mappedOptions}
+                    placeholder="Type to search buyer by name or NTN/CNIC"
+                    error={errors.buyerBusinessName?.message}
+                    required
+                  />
+                );
+              }}
             />
           </div>
 
