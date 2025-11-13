@@ -577,7 +577,7 @@ const FBRInvoiceForm = ({
             Buyer Information
           </h3>
           <a
-            href="/admin/customers/new"
+            href="/admin/customers"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-700"
