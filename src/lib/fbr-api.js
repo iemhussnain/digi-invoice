@@ -60,6 +60,7 @@ export function getFBRAuthToken(environment = 'production') {
 
 /**
  * Generic FBR API fetch function with automatic token injection
+ * Uses proxy when running on client-side to avoid CORS issues
  * @param {string} endpoint - API endpoint (e.g., '/pdi/v1/provinces')
  * @param {object} options - Fetch options
  * @param {string} environment - 'sandbox' or 'production' (defaults to production)
@@ -67,7 +68,77 @@ export function getFBRAuthToken(environment = 'production') {
  */
 export async function fbrApiFetch(endpoint, options = {}, environment = 'production') {
   const token = getFBRAuthToken(environment);
+  const isClient = typeof window !== 'undefined';
 
+  // Use proxy for client-side requests to avoid CORS issues
+  if (isClient) {
+    try {
+      const userToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+
+      if (options.method === 'POST') {
+        // For POST requests, send data in body
+        const response = await fetch('/api/fbr-proxy', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({
+            endpoint,
+            token,
+            ...options.body ? JSON.parse(options.body) : {},
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'FBR API request failed');
+        }
+
+        return data;
+      } else {
+        // For GET requests, use query params
+        const url = new URL('/api/fbr-proxy', window.location.origin);
+
+        // Parse endpoint for query params
+        const [path, queryString] = endpoint.split('?');
+        url.searchParams.set('endpoint', path);
+        url.searchParams.set('token', token);
+
+        // Add existing query params
+        if (queryString) {
+          const params = new URLSearchParams(queryString);
+          params.forEach((value, key) => {
+            url.searchParams.set(key, value);
+          });
+        }
+
+        const response = await fetch(url.toString(), {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userToken}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'FBR API request failed');
+        }
+
+        return data;
+      }
+    } catch (error) {
+      if (error instanceof TypeError) {
+        throw new Error('Network error - Unable to connect to FBR API');
+      }
+      throw error;
+    }
+  }
+
+  // Server-side: Direct FBR API call (no CORS issues)
   const config = {
     headers: {
       'Content-Type': 'application/json',
