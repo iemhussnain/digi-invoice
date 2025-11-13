@@ -18,7 +18,6 @@ const stockSchema = z.object({
   saleType: z.string().min(1, 'Sale type is required'),
   uoM: z.string().min(1, 'Unit of measurement is required'),
   quantity: z.coerce.number().nonnegative('Quantity must be 0 or greater'),
-  rate: z.coerce.number().nonnegative('Rate must be 0 or greater'),
 });
 
 export default function StockManagementPage() {
@@ -47,7 +46,6 @@ export default function StockManagementPage() {
       saleType: '',
       uoM: '',
       quantity: 0,
-      rate: 0,
     },
   });
 
@@ -135,7 +133,6 @@ export default function StockManagementPage() {
       saleType: stock.saleType,
       uoM: stock.uoM,
       quantity: stock.quantity,
-      rate: stock.rate,
     });
     setIsModalOpen(true);
   };
@@ -256,9 +253,6 @@ export default function StockManagementPage() {
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Quantity
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Rate
-                    </th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
@@ -284,9 +278,6 @@ export default function StockManagementPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <span className="text-sm text-gray-900">{stock.quantity}</span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <span className="text-sm text-gray-900">Rs. {stock.rate}</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <button
@@ -458,38 +449,21 @@ export default function StockManagementPage() {
                 />
               </div>
 
-              {/* Quantity & Rate */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Controller
-                  name="quantity"
-                  control={control}
-                  render={({ field }) => (
-                    <NumberInput
-                      label="Quantity"
-                      name="quantity"
-                      value={field.value}
-                      onChange={field.onChange}
-                      error={errors.quantity?.message}
-                      placeholder="0"
-                    />
-                  )}
-                />
-
-                <Controller
-                  name="rate"
-                  control={control}
-                  render={({ field }) => (
-                    <NumberInput
-                      label="Rate (Rs.)"
-                      name="rate"
-                      value={field.value}
-                      onChange={field.onChange}
-                      error={errors.rate?.message}
-                      placeholder="0.00"
-                    />
-                  )}
-                />
-              </div>
+              {/* Quantity */}
+              <Controller
+                name="quantity"
+                control={control}
+                render={({ field }) => (
+                  <NumberInput
+                    label="Quantity"
+                    name="quantity"
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={errors.quantity?.message}
+                    placeholder="0"
+                  />
+                )}
+              />
 
               {/* Buttons */}
               <div className="flex items-center gap-4 pt-4">
