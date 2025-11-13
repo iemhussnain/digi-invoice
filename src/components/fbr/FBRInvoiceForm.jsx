@@ -805,7 +805,7 @@ const FBRInvoiceForm = ({
             Product Details
           </h3>
           <a
-            href="/stock-management"
+            href="/admin/stock-management"
             className="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-purple-700"
           >
             <svg
