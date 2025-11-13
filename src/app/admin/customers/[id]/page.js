@@ -13,7 +13,16 @@ export default function EditCustomerPage({ params }) {
 
   const { data: customerData, isLoading, isError, error } = useCustomer(id);
   const updateCustomer = useUpdateCustomer();
-  const { data: provinces = [], isLoading: provincesLoading } = useFBRProvinces('production');
+  const {
+    data: provinces = [],
+    isLoading: provincesLoading,
+    error: provincesError
+  } = useFBRProvinces('production');
+
+  // Debug log
+  console.log('Provinces data:', provinces);
+  console.log('Provinces loading:', provincesLoading);
+  console.log('Provinces error:', provincesError);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -522,8 +531,14 @@ export default function EditCustomerPage({ params }) {
                     errors.billingState ? 'border-red-300' : 'border-gray-300'
                   }`}
                 >
-                  <option value="">Select Province</option>
-                  {provinces.map((province) => (
+                  <option value="">
+                    {provincesLoading
+                      ? 'Loading provinces...'
+                      : provincesError
+                      ? 'Error loading provinces'
+                      : `Select Province (${provinces.length} available)`}
+                  </option>
+                  {provinces && provinces.length > 0 && provinces.map((province) => (
                     <option key={province.stateProvinceCode} value={province.stateProvinceName}>
                       {province.stateProvinceName}
                     </option>
@@ -532,6 +547,11 @@ export default function EditCustomerPage({ params }) {
                 {errors.billingState && (
                   <p className="mt-1 text-sm text-red-600">
                     {typeof errors.billingState === 'string' ? errors.billingState : errors.billingState?.message}
+                  </p>
+                )}
+                {provincesError && (
+                  <p className="mt-1 text-sm text-orange-600">
+                    Could not load provinces from FBR API. You can still enter manually.
                   </p>
                 )}
               </div>
