@@ -70,7 +70,6 @@ export default function FBRInvoiceNewPage() {
 
         if (response.ok) {
           const data = await response.json();
-          console.log('Customers API Response:', data);
 
           // Map customers to the format expected by the form
           // API returns paginated response: {success: true, data: {customers: [...], pagination: {...}}}
@@ -97,8 +96,6 @@ export default function FBRInvoiceNewPage() {
             })
             .filter(client => client.buyerBusinessName); // Only include customers with names
 
-          console.log('Formatted Clients:', formattedClients);
-          console.log('Total clients after filtering:', formattedClients.length);
           setClientsList(formattedClients);
         } else {
           const errorData = await response.json();

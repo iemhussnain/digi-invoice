@@ -605,17 +605,11 @@ const FBRInvoiceForm = ({
               name="buyerBusinessName"
               control={control}
               render={({ field }) => {
-                // Debug: Log clients list
-                console.log('FBR Form - clientsList:', clientsList);
-                console.log('FBR Form - clientsList length:', clientsList?.length);
-
                 const mappedOptions = clientsList.map((client) => ({
                   label: `${client.buyerBusinessName} (${client.buyerNTNCNIC})`,
                   value: client.buyerBusinessName,
                   ...client,
                 }));
-
-                console.log('FBR Form - Mapped options:', mappedOptions);
 
                 return (
                   <Autocomplete
