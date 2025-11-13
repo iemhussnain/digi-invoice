@@ -114,8 +114,32 @@ export default function EditCustomerPage({ params }) {
     }
   }, [customerData]);
 
+  // Format STRN as user types: 11-11-1111-111-11
+  const formatSTRN = (value) => {
+    // Remove all non-digits
+    const digits = value.replace(/\D/g, '');
+
+    // Format as 11-11-1111-111-11
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 4) return `${digits.slice(0, 2)}-${digits.slice(2)}`;
+    if (digits.length <= 8) return `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4)}`;
+    if (digits.length <= 11) return `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4, 8)}-${digits.slice(8)}`;
+    return `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4, 8)}-${digits.slice(8, 11)}-${digits.slice(11, 13)}`;
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
+    // Apply STRN formatting
+    if (name === 'strn' && type !== 'checkbox') {
+      const formattedValue = formatSTRN(value);
+      setFormData((prev) => ({
+        ...prev,
+        [name]: formattedValue,
+      }));
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
@@ -311,13 +335,20 @@ export default function EditCustomerPage({ params }) {
                   value={formData.customerType}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.customerType ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 >
                   <option value="individual">Individual</option>
                   <option value="business">Business</option>
                   <option value="government">Government</option>
                   <option value="other">Other</option>
                 </select>
+                {errors.customerType && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {typeof errors.customerType === 'string' ? errors.customerType : errors.customerType?.message}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -343,7 +374,11 @@ export default function EditCustomerPage({ params }) {
                     errors.email ? 'border-red-300' : 'border-gray-300'
                   }`}
                 />
-                {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {typeof errors.email === 'string' ? errors.email : errors.email?.message}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -378,8 +413,15 @@ export default function EditCustomerPage({ params }) {
                   value={formData.website}
                   onChange={handleChange}
                   placeholder="https://example.com"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.website ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 />
+                {errors.website && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {typeof errors.website === 'string' ? errors.website : errors.website?.message}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -430,8 +472,15 @@ export default function EditCustomerPage({ params }) {
                   name="contactPersonEmail"
                   value={formData.contactPersonEmail}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.contactPersonEmail ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 />
+                {errors.contactPersonEmail && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {typeof errors.contactPersonEmail === 'string' ? errors.contactPersonEmail : errors.contactPersonEmail?.message}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -469,7 +518,9 @@ export default function EditCustomerPage({ params }) {
                   value={formData.billingState}
                   onChange={handleChange}
                   disabled={provincesLoading}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 ${
+                    errors.billingState ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 >
                   <option value="">Select Province</option>
                   {provinces.map((province) => (
@@ -478,6 +529,11 @@ export default function EditCustomerPage({ params }) {
                     </option>
                   ))}
                 </select>
+                {errors.billingState && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {typeof errors.billingState === 'string' ? errors.billingState : errors.billingState?.message}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -500,8 +556,15 @@ export default function EditCustomerPage({ params }) {
                   name="billingCountry"
                   value={formData.billingCountry}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.billingCountry ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 />
+                {errors.billingCountry && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {typeof errors.billingCountry === 'string' ? errors.billingCountry : errors.billingCountry?.message}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -517,9 +580,17 @@ export default function EditCustomerPage({ params }) {
                   name="ntn"
                   value={formData.ntn}
                   onChange={handleChange}
-                  placeholder="XXXXXXX-X"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  placeholder="0000000"
+                  maxLength="7"
+                  className={`w-full px-4 py-2 border rounded-lg ${
+                    errors.ntn ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 />
+                {errors.ntn && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {typeof errors.ntn === 'string' ? errors.ntn : errors.ntn?.message}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -529,8 +600,17 @@ export default function EditCustomerPage({ params }) {
                   name="strn"
                   value={formData.strn}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  placeholder="11-11-1111-111-11"
+                  maxLength="18"
+                  className={`w-full px-4 py-2 border rounded-lg ${
+                    errors.strn ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 />
+                {errors.strn && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {typeof errors.strn === 'string' ? errors.strn : errors.strn?.message}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -544,8 +624,15 @@ export default function EditCustomerPage({ params }) {
                   onChange={handleChange}
                   min="0"
                   step="0.01"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className={`w-full px-4 py-2 border rounded-lg ${
+                    errors.creditLimit ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 />
+                {errors.creditLimit && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {typeof errors.creditLimit === 'string' ? errors.creditLimit : errors.creditLimit?.message}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -558,8 +645,15 @@ export default function EditCustomerPage({ params }) {
                   value={formData.creditDays}
                   onChange={handleChange}
                   min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className={`w-full px-4 py-2 border rounded-lg ${
+                    errors.creditDays ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 />
+                {errors.creditDays && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {typeof errors.creditDays === 'string' ? errors.creditDays : errors.creditDays?.message}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -570,7 +664,9 @@ export default function EditCustomerPage({ params }) {
                   name="paymentTerms"
                   value={formData.paymentTerms}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className={`w-full px-4 py-2 border rounded-lg ${
+                    errors.paymentTerms ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 >
                   <option value="cash">Cash</option>
                   <option value="credit">Credit</option>
@@ -578,6 +674,11 @@ export default function EditCustomerPage({ params }) {
                   <option value="cod">Cash on Delivery</option>
                   <option value="custom">Custom</option>
                 </select>
+                {errors.paymentTerms && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {typeof errors.paymentTerms === 'string' ? errors.paymentTerms : errors.paymentTerms?.message}
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center pt-8">

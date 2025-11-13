@@ -17,6 +17,7 @@ export default function NewCustomerPage() {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(customerSchema),
@@ -60,6 +61,19 @@ export default function NewCustomerPage() {
   });
 
   const shippingSameAsBilling = watch('shippingSameAsBilling');
+
+  // Format STRN as user types: 11-11-1111-111-11
+  const formatSTRN = (value) => {
+    // Remove all non-digits
+    const digits = value.replace(/\D/g, '');
+
+    // Format as 11-11-1111-111-11
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 4) return `${digits.slice(0, 2)}-${digits.slice(2)}`;
+    if (digits.length <= 8) return `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4)}`;
+    if (digits.length <= 11) return `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4, 8)}-${digits.slice(8)}`;
+    return `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4, 8)}-${digits.slice(8, 11)}-${digits.slice(11, 13)}`;
+  };
 
   const onSubmit = (formData) => {
     // Prepare data
@@ -199,13 +213,18 @@ export default function NewCustomerPage() {
                 </label>
                 <select
                   {...register('customerType')}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.customerType ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 >
                   <option value="individual">Individual</option>
                   <option value="business">Business</option>
                   <option value="government">Government</option>
                   <option value="other">Other</option>
                 </select>
+                {errors.customerType && (
+                  <p className="mt-1 text-sm text-red-600">{errors.customerType.message}</p>
+                )}
               </div>
 
               <div>
@@ -341,7 +360,9 @@ export default function NewCustomerPage() {
                 <select
                   {...register('billingState')}
                   disabled={provincesLoading}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 ${
+                    errors.billingState ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 >
                   <option value="">Select Province</option>
                   {provinces.map((province) => (
@@ -350,6 +371,9 @@ export default function NewCustomerPage() {
                     </option>
                   ))}
                 </select>
+                {errors.billingState && (
+                  <p className="mt-1 text-sm text-red-600">{errors.billingState.message}</p>
+                )}
               </div>
 
               <div>
@@ -418,7 +442,9 @@ export default function NewCustomerPage() {
                   <select
                     {...register('shippingState')}
                     disabled={provincesLoading}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 ${
+                      errors.shippingState ? 'border-red-300' : 'border-gray-300'
+                    }`}
                   >
                     <option value="">Select Province</option>
                     {provinces.map((province) => (
@@ -427,6 +453,9 @@ export default function NewCustomerPage() {
                       </option>
                     ))}
                   </select>
+                  {errors.shippingState && (
+                    <p className="mt-1 text-sm text-red-600">{errors.shippingState.message}</p>
+                  )}
                 </div>
 
                 <div>
@@ -496,7 +525,12 @@ export default function NewCustomerPage() {
                 </label>
                 <input
                   type="text"
-                  {...register('strn')}
+                  {...register('strn', {
+                    onChange: (e) => {
+                      const formatted = formatSTRN(e.target.value);
+                      setValue('strn', formatted);
+                    },
+                  })}
                   placeholder="11-11-1111-111-11"
                   maxLength="18"
                   className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
@@ -586,7 +620,9 @@ export default function NewCustomerPage() {
                 </label>
                 <select
                   {...register('paymentTerms')}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.paymentTerms ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 >
                   <option value="cash">Cash</option>
                   <option value="credit">Credit</option>
@@ -594,6 +630,9 @@ export default function NewCustomerPage() {
                   <option value="cod">Cash on Delivery</option>
                   <option value="custom">Custom</option>
                 </select>
+                {errors.paymentTerms && (
+                  <p className="mt-1 text-sm text-red-600">{errors.paymentTerms.message}</p>
+                )}
               </div>
 
               <div>
@@ -602,7 +641,9 @@ export default function NewCustomerPage() {
                 </label>
                 <select
                   {...register('paymentMethod')}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.paymentMethod ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 >
                   <option value="cash">Cash</option>
                   <option value="bank_transfer">Bank Transfer</option>
@@ -610,6 +651,9 @@ export default function NewCustomerPage() {
                   <option value="credit_card">Credit Card</option>
                   <option value="online">Online Payment</option>
                 </select>
+                {errors.paymentMethod && (
+                  <p className="mt-1 text-sm text-red-600">{errors.paymentMethod.message}</p>
+                )}
               </div>
             </div>
           </div>
