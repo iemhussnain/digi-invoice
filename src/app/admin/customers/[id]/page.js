@@ -252,6 +252,20 @@ export default function EditCustomerPage({ params }) {
           </div>
         )}
 
+        {/* Validation Errors */}
+        {Object.keys(errors).length > 0 && (
+          <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-6">
+            <p className="text-red-800 font-bold mb-2">Validation Failed - Please fix the following errors:</p>
+            <ul className="list-disc list-inside space-y-1">
+              {Object.entries(errors).map(([field, error]) => (
+                <li key={field} className="text-red-700">
+                  <span className="font-semibold">{field}</span>: {typeof error === 'string' ? error : error?.message || 'Invalid value'}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Form (Same as New Customer) */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
