@@ -103,8 +103,7 @@ const customerSchema = new Schema(
         trim: true,
       },
       state: {
-        type: String,
-        trim: true,
+        type: Schema.Types.Mixed, // Can be String (old format) or Object {code, name} (FBR format)
       },
       postalCode: {
         type: String,
@@ -127,8 +126,7 @@ const customerSchema = new Schema(
         trim: true,
       },
       state: {
-        type: String,
-        trim: true,
+        type: Schema.Types.Mixed, // Can be String (old format) or Object {code, name} (FBR format)
       },
       postalCode: {
         type: String,

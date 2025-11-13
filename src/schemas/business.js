@@ -18,8 +18,8 @@ export const customerSchema = z.object({
   phone: z.string().optional(),
   mobile: z.string().optional(),
   website: z.string().url('Invalid URL').optional().or(z.literal('')),
-  customerType: z.enum(['individual', 'business'], {
-    errorMap: () => ({ message: 'Customer type must be either individual or business' }),
+  customerType: z.enum(['individual', 'business', 'government', 'other'], {
+    errorMap: () => ({ message: 'Customer type must be individual, business, government, or other' }),
   }),
   category: z.string().optional(),
 
