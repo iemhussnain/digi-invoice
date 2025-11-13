@@ -73,15 +73,18 @@ export default function FBRInvoiceNewPage() {
           console.log('Customers API Response:', data);
 
           // Map customers to the format expected by the form
-          const formattedClients = data.data?.map((customer) => ({
-            buyerNTNCNIC: customer.ntn || customer.cnic || '',
-            buyerBusinessName: customer.name || customer.businessName || customer.companyName || '',
-            buyerProvince: customer.province || 'Sindh',
-            buyerAddress: customer.address || customer.billingAddress?.street || '',
-            buyerRegistrationType: customer.registrationType || 'Registered',
-          })) || [];
+          const formattedClients = (data.data || [])
+            .map((customer) => ({
+              buyerNTNCNIC: customer.ntn || customer.cnic || '',
+              buyerBusinessName: customer.name || customer.companyName || '',
+              buyerProvince: customer.billingAddress?.state || 'Sindh',
+              buyerAddress: customer.billingAddress?.street || '',
+              buyerRegistrationType: customer.gstRegistered ? 'Registered' : 'Unregistered',
+            }))
+            .filter(client => client.buyerBusinessName); // Only include customers with names
 
           console.log('Formatted Clients:', formattedClients);
+          console.log('Total clients after filtering:', formattedClients.length);
           setClientsList(formattedClients);
         } else {
           const errorData = await response.json();
