@@ -43,6 +43,7 @@ export default function NewCustomerPage() {
       shippingPostalCode: '',
       shippingCountry: 'Pakistan',
       ntn: '',
+      referenceNumber: '',
       strn: '',
       cnic: '',
       gstRegistered: false,
@@ -95,6 +96,7 @@ export default function NewCustomerPage() {
       },
 
       ntn: formData.ntn || undefined,
+      referenceNumber: formData.referenceNumber || undefined,
       strn: formData.strn || undefined,
       cnic: formData.cnic || undefined,
       gstRegistered: formData.gstRegistered,
@@ -431,9 +433,31 @@ export default function NewCustomerPage() {
                 <input
                   type="text"
                   {...register('ntn')}
-                  placeholder="XXXXXXX-X"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="0000000"
+                  maxLength="7"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.ntn ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 />
+                {errors.ntn && <p className="mt-1 text-sm text-red-600">{errors.ntn.message}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Reference Number
+                </label>
+                <input
+                  type="text"
+                  {...register('referenceNumber')}
+                  placeholder="0000000-0"
+                  maxLength="9"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.referenceNumber ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                />
+                {errors.referenceNumber && (
+                  <p className="mt-1 text-sm text-red-600">{errors.referenceNumber.message}</p>
+                )}
               </div>
 
               <div>

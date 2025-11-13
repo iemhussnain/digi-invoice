@@ -45,7 +45,16 @@ export const customerSchema = z.object({
   shippingCountry: z.string().optional(),
 
   // Tax Information
-  ntn: z.string().optional(),
+  ntn: z
+    .string()
+    .regex(/^\d{7}$/, 'NTN must be exactly 7 digits')
+    .optional()
+    .or(z.literal('')),
+  referenceNumber: z
+    .string()
+    .regex(/^\d{7}-\d$/, 'Reference number must be in format 0000000-0')
+    .optional()
+    .or(z.literal('')),
   strn: z.string().optional(),
   cnic: z.string().optional(),
   gstRegistered: z.boolean().default(false),

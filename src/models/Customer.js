@@ -150,7 +150,14 @@ const customerSchema = new Schema(
       type: String,
       trim: true,
       uppercase: true,
-      match: [/^[0-9]{7}(-[0-9])?$/, 'Invalid NTN format'],
+      match: [/^[0-9]{7}$/, 'Invalid NTN format (7 digits)'],
+    },
+
+    referenceNumber: {
+      type: String,
+      trim: true,
+      uppercase: true,
+      match: [/^[0-9]{7}-[0-9]$/, 'Invalid reference number format (0000000-0)'],
     },
 
     strn: {
