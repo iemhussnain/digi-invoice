@@ -198,6 +198,16 @@ export default function DashboardPage() {
                 <span className="text-sm">Sales Invoices</span>
               </Link>
               <Link
+                href="/admin/invoices/fbr-new"
+                className="flex items-center p-3 rounded-lg bg-gradient-to-r from-blue-50 via-blue-100 to-indigo-100 hover:from-blue-100 hover:via-blue-200 hover:to-indigo-200 border-2 border-blue-300 text-blue-700 font-semibold transition-all duration-200 hover:scale-105 shadow-md"
+              >
+                <span className="text-2xl mr-3">📋</span>
+                <div className="flex flex-col">
+                  <span className="text-sm">FBR Digital Invoice</span>
+                  <span className="text-xs text-blue-600 font-normal">Federal Board of Revenue</span>
+                </div>
+              </Link>
+              <Link
                 href="/admin/vouchers"
                 className="flex items-center p-3 rounded-lg bg-gradient-to-r from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 text-green-700 font-semibold transition-all duration-200 hover:scale-105"
               >
