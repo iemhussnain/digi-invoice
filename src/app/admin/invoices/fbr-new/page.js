@@ -7,7 +7,7 @@ import Link from 'next/link';
 export default function FBRInvoiceNewPage() {
   const [userFBRInfo, setUserFBRInfo] = useState(null);
   const [clientsList, setClientsList] = useState([]);
-  const [environment, setEnvironment] = useState('sandbox'); // or 'production'
+  const [environment, setEnvironment] = useState('production'); // Production by default
 
   useEffect(() => {
     // Fetch user's FBR information from API or localStorage
@@ -118,15 +118,15 @@ export default function FBRInvoiceNewPage() {
             </div>
             <div className="flex items-center gap-4">
               {/* Environment Selector */}
-              <div className="flex items-center gap-2 bg-white rounded-lg px-4 py-2 shadow-sm border-2 border-gray-200">
+              <div className="flex items-center gap-2 bg-white rounded-lg px-4 py-2 shadow-sm border-2 border-green-300">
                 <span className="text-sm font-semibold text-gray-700">Environment:</span>
                 <select
                   value={environment}
                   onChange={(e) => setEnvironment(e.target.value)}
-                  className="text-sm font-medium px-2 py-1 rounded border-2 border-gray-200 focus:outline-none focus:border-blue-500"
+                  className="text-sm font-medium px-2 py-1 rounded border-2 border-green-400 text-green-700 bg-green-50 focus:outline-none focus:border-green-500"
                 >
-                  <option value="sandbox">Sandbox (Testing)</option>
                   <option value="production">Production (Live)</option>
+                  <option value="sandbox">Sandbox (Testing)</option>
                 </select>
               </div>
 
@@ -158,16 +158,16 @@ export default function FBRInvoiceNewPage() {
                 />
               </svg>
               <div>
-                <p className="font-semibold text-yellow-800">Testing Mode</p>
+                <p className="font-semibold text-yellow-800">Testing Mode (Sandbox)</p>
                 <p className="text-sm text-yellow-700">
-                  This invoice will be sent to FBR Sandbox environment for testing purposes
+                  This invoice will be sent to FBR Sandbox environment for testing purposes only
                 </p>
               </div>
             </div>
           ) : (
-            <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 flex items-center gap-3">
+            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4 flex items-center gap-3">
               <svg
-                className="h-5 w-5 text-green-600"
+                className="h-6 w-6 text-green-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -180,9 +180,9 @@ export default function FBRInvoiceNewPage() {
                 />
               </svg>
               <div>
-                <p className="font-semibold text-green-800">Production Mode</p>
-                <p className="text-sm text-green-700">
-                  This invoice will be sent to FBR Live environment and will be officially recorded
+                <p className="font-bold text-green-800">✓ Production Mode (Live)</p>
+                <p className="text-sm text-green-700 font-medium">
+                  This invoice will be sent to FBR Live Production environment and will be officially recorded with Federal Board of Revenue
                 </p>
               </div>
             </div>
