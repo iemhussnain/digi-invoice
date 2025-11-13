@@ -75,13 +75,26 @@ export default function FBRInvoiceNewPage() {
           // Map customers to the format expected by the form
           // API returns paginated response: {success: true, data: {customers: [...], pagination: {...}}}
           const formattedClients = (data.data.customers || [])
-            .map((customer) => ({
-              buyerNTNCNIC: customer.ntn || customer.cnic || '',
-              buyerBusinessName: customer.name || customer.companyName || '',
-              buyerProvince: customer.billingAddress?.state || 'Sindh',
-              buyerAddress: customer.billingAddress?.street || '',
-              buyerRegistrationType: customer.gstRegistered ? 'Registered' : 'Unregistered',
-            }))
+            .map((customer) => {
+              // Build complete address from billing address
+              const addressParts = [
+                customer.billingAddress?.street,
+                customer.billingAddress?.city,
+                customer.billingAddress?.state,
+                customer.billingAddress?.postalCode,
+                customer.billingAddress?.country,
+              ].filter(Boolean); // Remove empty/null/undefined values
+
+              const fullAddress = addressParts.length > 0 ? addressParts.join(', ') : '';
+
+              return {
+                buyerNTNCNIC: customer.ntn || customer.cnic || '',
+                buyerBusinessName: customer.name || customer.companyName || '',
+                buyerProvince: customer.billingAddress?.state || 'Sindh',
+                buyerAddress: fullAddress,
+                buyerRegistrationType: customer.gstRegistered ? 'Registered' : 'Unregistered',
+              };
+            })
             .filter(client => client.buyerBusinessName); // Only include customers with names
 
           console.log('Formatted Clients:', formattedClients);
