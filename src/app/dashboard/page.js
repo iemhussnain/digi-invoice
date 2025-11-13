@@ -208,6 +208,13 @@ export default function DashboardPage() {
                 </div>
               </Link>
               <Link
+                href="/admin/stock-management"
+                className="flex items-center p-3 rounded-lg bg-gradient-to-r from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 text-purple-700 font-semibold transition-all duration-200 hover:scale-105"
+              >
+                <span className="text-2xl mr-3">📦</span>
+                <span className="text-sm">Stock Management</span>
+              </Link>
+              <Link
                 href="/admin/vouchers"
                 className="flex items-center p-3 rounded-lg bg-gradient-to-r from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 text-green-700 font-semibold transition-all duration-200 hover:scale-105"
               >
