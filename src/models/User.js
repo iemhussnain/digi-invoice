@@ -152,6 +152,43 @@ const userSchema = new mongoose.Schema(
       },
     },
 
+    // FBR Digital Invoicing Credentials
+    fbrCredentials: {
+      token: {
+        type: String,
+        select: false, // Don't return token by default for security
+      },
+      ntn: {
+        type: String, // National Tax Number
+        trim: true,
+      },
+      businessName: {
+        type: String,
+        trim: true,
+      },
+      province: {
+        type: String,
+        trim: true,
+      },
+      provinceNumber: {
+        type: Number,
+      },
+      businessAddress: {
+        type: String,
+        trim: true,
+      },
+      gst: {
+        type: String, // GST Registration Number
+        trim: true,
+      },
+      tokenExpiry: {
+        type: Date,
+      },
+      tokenUpdatedAt: {
+        type: Date,
+      },
+    },
+
     // Audit Fields
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
