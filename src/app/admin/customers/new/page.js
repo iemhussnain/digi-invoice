@@ -85,6 +85,26 @@ export default function NewCustomerPage() {
   };
 
   const onSubmit = (formData) => {
+    // Parse province data if it's a JSON string
+    let billingStateData = formData.billingState;
+    let shippingStateData = formData.shippingState;
+
+    try {
+      if (billingStateData && billingStateData.startsWith('{')) {
+        billingStateData = JSON.parse(billingStateData);
+      }
+    } catch (e) {
+      // If parsing fails, keep as string
+    }
+
+    try {
+      if (shippingStateData && shippingStateData.startsWith('{')) {
+        shippingStateData = JSON.parse(shippingStateData);
+      }
+    } catch (e) {
+      // If parsing fails, keep as string
+    }
+
     // Prepare data
     const customerData = {
       name: formData.name,
@@ -106,7 +126,7 @@ export default function NewCustomerPage() {
       billingAddress: {
         street: formData.billingStreet || undefined,
         city: formData.billingCity || undefined,
-        state: formData.billingState || undefined,
+        state: billingStateData || undefined,
         postalCode: formData.billingPostalCode || undefined,
         country: formData.billingCountry,
       },
@@ -115,7 +135,7 @@ export default function NewCustomerPage() {
         sameAsBilling: formData.shippingSameAsBilling,
         street: formData.shippingSameAsBilling ? undefined : formData.shippingStreet,
         city: formData.shippingSameAsBilling ? undefined : formData.shippingCity,
-        state: formData.shippingSameAsBilling ? undefined : formData.shippingState,
+        state: formData.shippingSameAsBilling ? undefined : shippingStateData,
         postalCode: formData.shippingSameAsBilling ? undefined : formData.shippingPostalCode,
         country: formData.shippingSameAsBilling ? undefined : formData.shippingCountry,
       },
@@ -381,8 +401,14 @@ export default function NewCustomerPage() {
                       : `Select Province (${provinces.length} available)`}
                   </option>
                   {provinces && provinces.length > 0 && provinces.map((province) => (
-                    <option key={province.stateProvinceCode} value={province.stateProvinceName}>
-                      {province.stateProvinceName}
+                    <option
+                      key={province.stateProvinceCode}
+                      value={JSON.stringify({
+                        code: province.stateProvinceCode,
+                        name: province.stateProvinceDesc
+                      })}
+                    >
+                      {province.stateProvinceDesc}
                     </option>
                   ))}
                 </select>
@@ -474,8 +500,14 @@ export default function NewCustomerPage() {
                         : `Select Province (${provinces.length} available)`}
                     </option>
                     {provinces && provinces.length > 0 && provinces.map((province) => (
-                      <option key={province.stateProvinceCode} value={province.stateProvinceName}>
-                        {province.stateProvinceName}
+                      <option
+                        key={province.stateProvinceCode}
+                        value={JSON.stringify({
+                          code: province.stateProvinceCode,
+                          name: province.stateProvinceDesc
+                        })}
+                      >
+                        {province.stateProvinceDesc}
                       </option>
                     ))}
                   </select>

@@ -78,6 +78,25 @@ export default function EditCustomerPage({ params }) {
   useEffect(() => {
     if (customerData?.customer) {
       const customer = customerData.customer;
+
+      // Handle province data - convert to JSON string if it's an object
+      let billingState = customer.billingAddress?.state || '';
+      let shippingState = customer.shippingAddress?.state || '';
+
+      if (typeof billingState === 'object' && billingState !== null) {
+        billingState = JSON.stringify({
+          code: billingState.code,
+          name: billingState.name
+        });
+      }
+
+      if (typeof shippingState === 'object' && shippingState !== null) {
+        shippingState = JSON.stringify({
+          code: shippingState.code,
+          name: shippingState.name
+        });
+      }
+
       setFormData({
         name: customer.name || '',
         companyName: customer.companyName || '',
@@ -95,14 +114,14 @@ export default function EditCustomerPage({ params }) {
 
         billingStreet: customer.billingAddress?.street || '',
         billingCity: customer.billingAddress?.city || '',
-        billingState: customer.billingAddress?.state || '',
+        billingState: billingState,
         billingPostalCode: customer.billingAddress?.postalCode || '',
         billingCountry: customer.billingAddress?.country || 'Pakistan',
 
         shippingSameAsBilling: customer.shippingAddress?.sameAsBilling ?? true,
         shippingStreet: customer.shippingAddress?.street || '',
         shippingCity: customer.shippingAddress?.city || '',
-        shippingState: customer.shippingAddress?.state || '',
+        shippingState: shippingState,
         shippingPostalCode: customer.shippingAddress?.postalCode || '',
         shippingCountry: customer.shippingAddress?.country || 'Pakistan',
 
@@ -159,6 +178,26 @@ export default function EditCustomerPage({ params }) {
     e.preventDefault();
     setErrors({});
 
+    // Parse province data if it's a JSON string
+    let billingStateData = formData.billingState;
+    let shippingStateData = formData.shippingState;
+
+    try {
+      if (billingStateData && typeof billingStateData === 'string' && billingStateData.startsWith('{')) {
+        billingStateData = JSON.parse(billingStateData);
+      }
+    } catch (e) {
+      // If parsing fails, keep as string
+    }
+
+    try {
+      if (shippingStateData && typeof shippingStateData === 'string' && shippingStateData.startsWith('{')) {
+        shippingStateData = JSON.parse(shippingStateData);
+      }
+    } catch (e) {
+      // If parsing fails, keep as string
+    }
+
     // Prepare data
     const customerDataToUpdate = {
       name: formData.name,
@@ -180,7 +219,7 @@ export default function EditCustomerPage({ params }) {
       billingAddress: {
         street: formData.billingStreet || undefined,
         city: formData.billingCity || undefined,
-        state: formData.billingState || undefined,
+        state: billingStateData || undefined,
         postalCode: formData.billingPostalCode || undefined,
         country: formData.billingCountry,
       },
@@ -189,7 +228,7 @@ export default function EditCustomerPage({ params }) {
         sameAsBilling: formData.shippingSameAsBilling,
         street: formData.shippingSameAsBilling ? undefined : formData.shippingStreet,
         city: formData.shippingSameAsBilling ? undefined : formData.shippingCity,
-        state: formData.shippingSameAsBilling ? undefined : formData.shippingState,
+        state: formData.shippingSameAsBilling ? undefined : shippingStateData,
         postalCode: formData.shippingSameAsBilling ? undefined : formData.shippingPostalCode,
         country: formData.shippingSameAsBilling ? undefined : formData.shippingCountry,
       },
@@ -539,8 +578,14 @@ export default function EditCustomerPage({ params }) {
                       : `Select Province (${provinces.length} available)`}
                   </option>
                   {provinces && provinces.length > 0 && provinces.map((province) => (
-                    <option key={province.stateProvinceCode} value={province.stateProvinceName}>
-                      {province.stateProvinceName}
+                    <option
+                      key={province.stateProvinceCode}
+                      value={JSON.stringify({
+                        code: province.stateProvinceCode,
+                        name: province.stateProvinceDesc
+                      })}
+                    >
+                      {province.stateProvinceDesc}
                     </option>
                   ))}
                 </select>
