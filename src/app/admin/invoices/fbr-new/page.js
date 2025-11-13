@@ -70,16 +70,23 @@ export default function FBRInvoiceNewPage() {
 
         if (response.ok) {
           const data = await response.json();
+          console.log('Customers API Response:', data);
+
           // Map customers to the format expected by the form
           const formattedClients = data.data?.map((customer) => ({
             buyerNTNCNIC: customer.ntn || customer.cnic || '',
-            buyerBusinessName: customer.name || customer.businessName || '',
+            buyerBusinessName: customer.name || customer.businessName || customer.companyName || '',
             buyerProvince: customer.province || 'Sindh',
-            buyerAddress: customer.address || '',
+            buyerAddress: customer.address || customer.billingAddress?.street || '',
             buyerRegistrationType: customer.registrationType || 'Registered',
           })) || [];
 
+          console.log('Formatted Clients:', formattedClients);
           setClientsList(formattedClients);
+        } else {
+          const errorData = await response.json();
+          console.error('Failed to fetch customers:', response.status, errorData);
+          setClientsList([]);
         }
       } catch (error) {
         console.error('Error fetching clients:', error);
