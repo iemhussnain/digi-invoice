@@ -17,7 +17,6 @@ const stockSchema = z.object({
   description: z.string().optional(),
   saleType: z.string().min(1, 'Sale type is required'),
   uoM: z.string().min(1, 'Unit of measurement is required'),
-  quantity: z.coerce.number().nonnegative('Quantity must be 0 or greater'),
 });
 
 export default function StockManagementPage() {
@@ -45,7 +44,6 @@ export default function StockManagementPage() {
       description: '',
       saleType: '',
       uoM: '',
-      quantity: 0,
     },
   });
 
@@ -132,7 +130,6 @@ export default function StockManagementPage() {
       description: stock.description,
       saleType: stock.saleType,
       uoM: stock.uoM,
-      quantity: stock.quantity,
     });
     setIsModalOpen(true);
   };
@@ -250,9 +247,6 @@ export default function StockManagementPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       UoM
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Quantity
-                    </th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
@@ -275,9 +269,6 @@ export default function StockManagementPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-sm text-gray-900">{stock.uoM}</span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <span className="text-sm text-gray-900">{stock.quantity}</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <button
@@ -448,22 +439,6 @@ export default function StockManagementPage() {
                   )}
                 />
               </div>
-
-              {/* Quantity */}
-              <Controller
-                name="quantity"
-                control={control}
-                render={({ field }) => (
-                  <NumberInput
-                    label="Quantity"
-                    name="quantity"
-                    value={field.value}
-                    onChange={field.onChange}
-                    error={errors.quantity?.message}
-                    placeholder="0"
-                  />
-                )}
-              />
 
               {/* Buttons */}
               <div className="flex items-center gap-4 pt-4">
