@@ -398,7 +398,7 @@ export default function NewCustomerPage() {
                       ? 'Loading provinces...'
                       : provincesError
                       ? 'Error loading provinces'
-                      : `Select Province (${provinces.length} available)`}
+                      : `Select Province`}
                   </option>
                   {provinces && provinces.length > 0 && provinces.map((province) => (
                     <option
